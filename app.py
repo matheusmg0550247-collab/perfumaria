@@ -81,7 +81,7 @@ visor_b64 = get_img_as_base64(path_visor)
 preco_atual = produto_atual["preco"]
 preco_antigo = preco_atual + (100 if preco_atual > 0 else 0)
 
-# --- 5. CSS DEFINITIVO (AJUSTE FINO DE POSIÇÃO) ---
+# --- 5. CSS DEFINITIVO (COM AJUSTES FINAIS DE POSIÇÃO E ZOOM) ---
 bg_visor_css = f"url('data:image/png;base64,{visor_b64}')" if visor_b64 else "#222"
 
 st.markdown(f"""
@@ -127,16 +127,20 @@ st.markdown(f"""
     }}
 
     .perfume-img {{
-        /* AJUSTE 1: Reduzi a altura de 85% para 78% para dar respiro no topo */
         height: 78%; 
         width: auto;
         mix-blend-mode: multiply;
         filter: contrast(1.1) brightness(0.95);
         transition: transform 0.5s ease;
-        /* AJUSTE 2: Aumentei a margem inferior para levantar o perfume da base */
-        margin-bottom: 4%; 
+        margin-bottom: 4%;
+        /* AJUSTE 1: Empurrar um pouco para a direita para centralizar visualmente */
+        margin-left: 1.5%;
     }}
-    .perfume-img:hover {{ transform: scale(1.05); mix-blend-mode: normal; }}
+    .perfume-img:hover {{
+        /* AJUSTE 2: Zoom SUPER GRANDE (de 1.05 para 1.35) */
+        transform: scale(1.35);
+        mix-blend-mode: normal;
+    }}
 
     /* INFO E BOTOES */
     .info-container {{ text-align: center; }}
