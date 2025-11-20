@@ -2,15 +2,16 @@ import streamlit as st
 import base64
 import os
 
-# --- 1. CONFIGURAÇÃO DA PÁGINA (AGORA EM WIDE/LARGURA TOTAL) ---
+# --- 1. CONFIGURAÇÃO DA PÁGINA ---
 st.set_page_config(
     page_title="Aurum Scents",
     page_icon="⚜️",
-    layout="wide",  # <--- MUDANÇA AQUI: Usa a tela toda
+    layout="centered", # Voltamos para centered para manter a classe
     initial_sidebar_state="collapsed"
 )
 
-# --- 2. DADOS DOS PRODUTOS ---
+# --- 2. DADOS DOS PRODUTOS (MUITO IMPORTANTE: NOMES EXATOS) ---
+# Baseado no seu print: Pasta 'imagens', 'Perfume X.png' (P maiúsculo, espaço)
 produtos = [
     {
         "nome": "Royal Elixir Gold",
@@ -31,16 +32,20 @@ produtos = [
         "nome": "Imperial Amber",
         "imagem": "imagens/Perfume 4.png", 
         "preco": 380.00
+    },
+     {
+        "nome": "Golden Oud",
+        "imagem": "imagens/Perfume 5.png", 
+        "preco": 450.00
     }
 ]
 
-# --- 3. FUNÇÕES ---
+# --- 3. FUNÇÕES E DEBUG ---
 def get_img_as_base64(file_path):
     if not os.path.exists(file_path):
         return None
     with open(file_path, "rb") as f:
         data = f.read()
-    # .replace('\n', '') garante que não quebra o HTML
     return base64.b64encode(data).decode('utf-8').replace('\n', '')
 
 # Navegação
@@ -59,218 +64,222 @@ def anterior():
     else:
         st.session_state.idx = len(produtos) - 1
 
-# --- 4. CARREGAMENTO DE IMAGENS ---
+# --- 4. CARREGAMENTO (COM VERIFICAÇÃO) ---
 visor_path = "imagens/Visor.jpg"
 visor_b64 = get_img_as_base64(visor_path)
 
 produto_atual = produtos[st.session_state.idx]
-img_produto_b64 = get_img_as_base64(produto_atual["imagem"])
+img_path_atual = produto_atual["imagem"]
+img_produto_b64 = get_img_as_base64(img_path_atual)
 
 preco_atual = produto_atual["preco"]
 preco_antigo = preco_atual + 100.00
 
-# --- 5. CSS (ESTILO E POSICIONAMENTO) ---
+# --- DEBUG VISUAL (Para ajudar a achar o erro da imagem) ---
+# Se a imagem do perfume não carregar, mostra um aviso na barra lateral
+if not img_produto_b64:
+    with st.sidebar:
+        st.error(f"❌ ERRO: Não encontrei '{img_path_atual}'")
+        st.warning("Arquivos encontrados na pasta 'imagens':")
+        try:
+            arquivos = os.listdir("imagens")
+            st.write(arquivos)
+        except:
+            st.error("A pasta 'imagens' não foi encontrada.")
+
+# --- 5. CSS DE LUXO (Refinado) ---
 bg_visor_css = f"url('data:image/jpg;base64,{visor_b64}')" if visor_b64 else "none"
 
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
 
-    /* Fundo Geral */
+    /* Fundo Preto Absoluto */
     .stApp {{
-        background-color: #050505;
+        background-color: #000000;
         color: #d4af37;
     }}
     
-    /* Remove margens padrão do Streamlit para aproveitar espaço */
+    /* Ajuste do container principal para ser maior */
     .block-container {{
+        max-width: 900px !important;
         padding-top: 2rem;
         padding-bottom: 5rem;
-        max-width: 100% !important;
     }}
 
-    /* --- VISOR --- */
-    .visor-container {{
+    /* TÍTULO */
+    .brand-header {{
+        text-align: center;
+        margin-bottom: 30px;
+    }}
+    .brand-title {{
+        font-family: 'Cinzel', serif;
+        font-size: 3.5rem;
+        background: linear-gradient(to right, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin: 0;
+        letter-spacing: 2px;
+    }}
+    .brand-sub {{
+        font-family: 'Playfair Display', serif;
+        color: #666;
+        letter-spacing: 4px;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        margin-top: 5px;
+    }}
+
+    /* VISOR */
+    .visor-wrapper {{
         position: relative;
         width: 100%;
-        /* Altura fixa para garantir que o visor apareça inteiro */
-        height: 70vh; 
         display: flex;
         justify-content: center;
-        align-items: center;
+        margin-bottom: 20px;
     }}
 
     .visor-frame {{
         position: relative;
-        height: 100%;
-        aspect-ratio: 9/13; /* Proporção aproximada da imagem do visor */
+        width: 100%; 
+        max-width: 650px; /* Tamanho ideal para não ficar pequeno */
+        aspect-ratio: 16/9; /* Ajuste para cortar um pouco do teto/chão da foto e focar no quadro */
         background-image: {bg_visor_css};
-        background-size: contain;
-        background-repeat: no-repeat;
+        background-size: cover; /* Cover faz 'zoom' na imagem para preencher */
         background-position: center;
-        /* Sombra para dar profundidade na tela */
-        filter: drop-shadow(0 0 30px rgba(212, 175, 55, 0.1));
+        border-radius: 5px;
+        box-shadow: 0 0 50px rgba(0,0,0,0.8);
     }}
 
-    /* --- PERFUME (CORREÇÃO DE POSIÇÃO) --- */
+    /* PERFUME - POSICIONAMENTO ABSOLUTO */
     .perfume-overlay {{
         position: absolute;
-        /* Centraliza exatamente no meio do visor */
-        top: 48%; 
+        top: 50%;
         left: 50%;
-        transform: translate(-50%, -50%);
-        
-        /* Tamanho do perfume em relação ao visor */
-        width: 55%; 
-        height: auto;
-        
+        transform: translate(-50%, -43%); /* Ajuste fino vertical */
+        height: 55%; /* O perfume ocupa 55% da altura do quadro */
+        width: auto;
+        filter: drop-shadow(0 10px 15px rgba(0,0,0,0.7));
+        transition: all 0.5s ease-in-out;
         z-index: 10;
-        filter: drop-shadow(0 15px 20px rgba(0,0,0,0.6));
-        transition: all 0.5s ease;
     }}
     
     .perfume-overlay:hover {{
-        transform: translate(-50%, -52%) scale(1.05); /* Sobe um pouquinho ao passar o mouse */
+        transform: translate(-50%, -45%) scale(1.05);
     }}
 
-    /* --- TEXTOS --- */
-    .brand-title {{
-        font-family: 'Cinzel', serif;
-        font-size: 4vw; /* Tamanho responsivo */
-        text-align: center;
-        color: #d4af37;
-        margin-bottom: 0;
-        text-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
-    }}
-    
-    .product-name {{
-        font-family: 'Cinzel', serif;
-        font-size: 2rem;
-        color: #fff;
-        text-align: center;
-        margin-top: 1rem;
-    }}
-    
-    .price-box {{
-        text-align: center;
-        font-family: 'Playfair Display', serif;
-    }}
-    
-    .old-price {{ text-decoration: line-through; color: #666; font-size: 1.2rem; }}
-    .new-price {{ color: #d4af37; font-size: 3rem; font-weight: bold; }}
-
-    /* --- BOTÕES --- */
+    /* BOTÕES (Integrados e Próximos) */
     div.stButton > button {{
         background: transparent;
-        border: 1px solid #444;
+        border: 1px solid #333;
         color: #888;
-        width: 100%;
-        height: 100%;
-        padding: 20px 0;
         font-family: 'Cinzel', serif;
         font-size: 1.2rem;
+        padding: 0.5rem 1rem;
+        width: 100%;
         transition: 0.3s;
     }}
     div.stButton > button:hover {{
         border-color: #d4af37;
         color: #d4af37;
-        background: rgba(212, 175, 55, 0.05);
+        background: rgba(212, 175, 55, 0.1);
+        box-shadow: 0 0 15px rgba(212, 175, 55, 0.2);
     }}
 
-    /* --- CONTATO --- */
-    .whatsapp-float {{
+    /* INFORMAÇÕES DO PRODUTO */
+    .info-container {{
+        text-align: center;
+        margin-top: 10px;
+    }}
+    .prod-name {{
+        font-family: 'Cinzel', serif;
+        font-size: 2rem;
+        color: #fff;
+        margin-bottom: 5px;
+    }}
+    .price-box {{
+        font-family: 'Playfair Display', serif;
+    }}
+    .old {{ text-decoration: line-through; color: #555; font-size: 1.1rem; margin-right: 10px; }}
+    .new {{ color: #d4af37; font-size: 2.5rem; font-weight: 700; }}
+
+    /* WHATSAPP FLUTUANTE */
+    .wa-float {{
         position: fixed;
         bottom: 30px;
         right: 30px;
         background-color: #25d366;
-        color: #FFF;
+        color: #fff;
+        padding: 15px 30px;
         border-radius: 50px;
-        padding: 15px 25px;
         text-decoration: none;
         font-weight: bold;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-        z-index: 100;
-        font-family: sans-serif;
-        border: 2px solid #1da851;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+        z-index: 999;
+        border: 1px solid #1da851;
         transition: 0.3s;
     }}
-    .whatsapp-float:hover {{
-        transform: scale(1.1);
+    .wa-float:hover {{
+        transform: scale(1.05);
         color: white;
+        box-shadow: 0 0 20px #25d366;
     }}
-
 </style>
 """, unsafe_allow_html=True)
 
-# --- 6. LAYOUT (GRID) ---
+# --- 6. LAYOUT VISUAL ---
 
-# Título
-st.markdown('<div class="brand-title">AURUM SCENTS</div>', unsafe_allow_html=True)
-st.markdown('<div style="text-align:center; color:#888; letter-spacing:4px; margin-bottom:20px;">LUXURY FRAGRANCES</div>', unsafe_allow_html=True)
+# Header
+st.markdown("""
+    <div class="brand-header">
+        <div class="brand-title">AURUM SCENTS</div>
+        <div class="brand-sub">Luxury Fragrances</div>
+    </div>
+""", unsafe_allow_html=True)
 
-# Grid Principal: 3 Colunas (Botão Esq | Visor Central | Botão Dir)
-# A coluna do meio (5) é bem maior que as laterais (1)
-col_esq, col_meio, col_dir = st.columns([1, 4, 1], gap="large")
+# Área Principal (Visor + Botões laterais próximos)
+col_E, col_C, col_D = st.columns([1, 10, 1]) # Coluna do meio bem larga
 
-# Coluna Esquerda (Botão Voltar - Alinhado verticalmente ao meio usando CSS seria complexo, 
-# então usamos espaço em branco 'write' para empurrar pra baixo se precisar, ou deixamos no topo)
-with col_esq:
-    st.write("") 
-    st.write("")
-    st.write("")
-    st.write("")
-    st.write("")
-    st.write("")
-    st.button("❮ ANTERIOR", on_click=anterior, use_container_width=True)
-
-# Coluna do Meio (O Visor)
-with col_meio:
+with col_C:
+    # O Visor
     if not visor_b64:
-        st.error("⚠️ Erro: Visor.jpg não encontrado na pasta imagens.")
+        st.error("⚠️ Erro: 'imagens/Visor.jpg' não encontrado.")
     else:
-        # Monta a imagem do perfume
-        src_img = f"data:image/png;base64,{img_produto_b64}" if img_produto_b64 else ""
+        src = f"data:image/png;base64,{img_produto_b64}" if img_produto_b64 else ""
+        # Se não tiver imagem, usa placeholder transparente para não quebrar layout
+        if not src: src = "https://via.placeholder.com/150x300/000000/000000?text=." 
         
-        # HTML Limpo para evitar quebra
-        html_visor = f"""
-        <div class="visor-container">
+        st.markdown(f"""
+        <div class="visor-wrapper">
             <div class="visor-frame">
-                <img src="{src_img}" class="perfume-overlay">
+                <img src="{src}" class="perfume-overlay">
             </div>
         </div>
-        """
-        st.markdown(html_visor, unsafe_allow_html=True)
-        
-        # Informações logo abaixo do visor
-        st.markdown(f"""
-            <div class="product-name">{produto_atual['nome']}</div>
-            <div class="price-box">
-                <span class="old-price">De R$ {preco_antigo:.2f}</span><br>
-                <span class="new-price">R$ {preco_atual:.2f}</span>
-            </div>
         """, unsafe_allow_html=True)
 
-# Coluna Direita (Botão Avançar)
-with col_dir:
-    st.write("")
-    st.write("")
-    st.write("")
-    st.write("")
-    st.write("")
-    st.write("")
-    st.button("PRÓXIMO ❯", on_click=proximo, use_container_width=True)
+# Controles de Navegação (Logo abaixo do visor, centralizados)
+c1, c2, c3, c4 = st.columns([1, 2, 2, 1])
+with c2:
+    st.button("❮ ANTERIOR", on_click=anterior)
+with c3:
+    st.button("PRÓXIMO ❯", on_click=proximo)
 
-
-# --- 7. BOTÃO FLUTUANTE DO WHATSAPP (Fixo no canto da tela) ---
-msg = f"Olá Jerry! Tenho interesse no perfume {produto_atual['nome']} de R$ {preco_atual}."
-link_wa = f"https://wa.me/5531992051499?text={msg.replace(' ', '%20')}"
-
+# Informações e Preço
 st.markdown(f"""
-    <a href="{link_wa}" target="_blank" class="whatsapp-float">
+    <div class="info-container">
+        <div class="prod-name">{produto_atual['nome']}</div>
+        <div class="price-box">
+            <span class="old">De R$ {preco_antigo:.2f}</span>
+            <span class="new">R$ {preco_atual:.2f}</span>
+        </div>
+    </div>
+""", unsafe_allow_html=True)
+
+# Botão WhatsApp
+msg = f"Olá Jerry! Tenho interesse no perfume {produto_atual['nome']}."
+link_wa = f"https://wa.me/5531992051499?text={msg.replace(' ', '%20')}"
+st.markdown(f"""
+    <a href="{link_wa}" target="_blank" class="wa-float">
         Falar com Jerry Bombeta 💬
     </a>
 """, unsafe_allow_html=True)
-
-# Footer discreto
-st.markdown("<div style='text-align:center; margin-top:50px; color:#333;'>Aurum Scents © 2025</div>", unsafe_allow_html=True)
-        
