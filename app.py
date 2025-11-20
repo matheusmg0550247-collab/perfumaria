@@ -2,44 +2,44 @@ import streamlit as st
 import base64
 import os
 
-# --- 1. CONFIGURAÇÃO DA PÁGINA (WIDE PARA 3 COLUNAS) ---
+# --- 1. CONFIGURAÇÃO DA PÁGINA ---
 st.set_page_config(
     page_title="Aurum Scents",
     page_icon="⚜️",
-    layout="wide", # Usando a largura total
-    initial_sidebar_state="collapsed"
+    layout="wide",
+    initial_sidebar_state="expanded" # Deixei expandido para você ver o debug
 )
 
 # --- 2. DADOS DOS PRODUTOS ---
-# Nomes exatos conforme seu último print (sem espaços)
 produtos = [
     {"nome": "Royal Elixir Gold", "imagem": "imagens/Perfume1.png", "preco": 299.90, "desc": "Notas de ouro e especiarias raras."},
     {"nome": "Black Orchid Intense", "imagem": "imagens/Perfume2.png", "preco": 350.00, "desc": "Orquídea negra profunda e misteriosa."},
     {"nome": "Velvet Santal Wood", "imagem": "imagens/Perfume3.png", "preco": 420.00, "desc": "Sândalo aveludado e envolvente."},
     {"nome": "Imperial Amber", "imagem": "imagens/Perfume4.png", "preco": 380.00, "desc": "Âmbar imperial com toque cítrico."},
-    # Adicione os outros...
 ]
 
-# --- 3. FUNÇÕES UTILITÁRIAS E DIAGNÓSTICO ---
+# --- 3. FUNÇÕES E DIAGNÓSTICO (RAIO-X DE ARQUIVOS) ---
 def get_img_as_base64(file_path):
-    # --- DIAGNÓSTICO DE ERRO ---
     if not os.path.exists(file_path):
-        print(f"\n--- ERRO CRÍTICO ---")
-        print(f"O arquivo NÃO foi encontrado no caminho: '{file_path}'")
-        try:
-            pasta = os.path.dirname(file_path)
-            conteudo = os.listdir(pasta)
-            print(f"Conteúdo real da pasta '{pasta}' no servidor:")
-            print(conteudo)
-            print("--------------------\n")
-        except Exception as e:
-             print(f"Não consegui ler a pasta: {e}")
         return None
-    # ---------------------------
-
     with open(file_path, "rb") as f:
         data = f.read()
     return base64.b64encode(data).decode('utf-8').replace('\n', '')
+
+# --- PAINEL DE DEBUG LATERAL (PARA ACHAR O ERRO DA IMAGEM) ---
+with st.sidebar:
+    st.header("🔧 Painel de Debug")
+    st.write("Este painel mostra o que o Python está vendo.")
+    
+    pasta_imagens = "imagens"
+    if os.path.exists(pasta_imagens):
+        st.success(f"✅ Pasta '{pasta_imagens}' encontrada!")
+        arquivos = os.listdir(pasta_imagens)
+        st.write("📂 Arquivos dentro da pasta:")
+        st.code(arquivos) # Mostra a lista exata de arquivos
+    else:
+        st.error(f"❌ A pasta '{pasta_imagens}' NÃO existe na raiz.")
+        st.write("Onde estou rodando:", os.getcwd())
 
 # --- 4. NAVEGAÇÃO ---
 if 'idx' not in st.session_state: st.session_state.idx = 0
@@ -49,7 +49,7 @@ def proximo():
 def anterior():
     st.session_state.idx = (st.session_state.idx - 1 + len(produtos)) % len(produtos)
 
-# --- 5. CARREGAMENTO DE ATIVOS ---
+# --- 5. CARREGAMENTO ---
 visor_path = "imagens/Visor.jpg"
 visor_b64 = get_img_as_base64(visor_path)
 
@@ -59,7 +59,7 @@ img_produto_b64 = get_img_as_base64(produto_atual["imagem"])
 preco_atual = produto_atual["preco"]
 preco_antigo = preco_atual + 100.00
 
-# --- 6. CSS DE LUXO (NOVO LAYOUT) ---
+# --- 6. CSS (TEXTO JUSTIFICADO + CORREÇÃO BOTÃO) ---
 bg_visor_css = f"url('data:image/jpg;base64,{visor_b64}')" if visor_b64 else "#111"
 
 st.markdown(f"""
@@ -78,54 +78,80 @@ st.markdown(f"""
         margin: 0; letter-spacing: 5px;
     }}
 
-    /* --- COLUNA ESQUERDA (Texto) --- */
-    .left-panel {{ padding-right: 20px; border-right: 1px solid #222; height: 100%; }}
-    .panel-title {{ font-family: 'Cinzel', serif; font-size: 1.5rem; color: #fff; margin-bottom: 20px; }}
-    .panel-text {{ font-family: 'Playfair Display', serif; font-size: 1.1rem; color: #aaa; line-height: 1.6; }}
+    /* --- COLUNA ESQUERDA (Texto Justificado) --- */
+    .left-panel {{ 
+        padding-right: 30px; 
+        border-right: 1px solid #222; 
+        height: 100%; 
+        display: flex;
+        flex-direction: column;
+        justify-content: center; /* Centraliza o bloco verticalmente */
+    }}
+    .panel-title {{ 
+        font-family: 'Cinzel', serif; 
+        font-size: 1.8rem; 
+        color: #fff; 
+        margin-bottom: 25px; 
+        text-align: center; /* Título centralizado */
+    }}
+    .panel-text {{ 
+        font-family: 'Playfair Display', serif; 
+        font-size: 1.15rem; 
+        color: #aaa; 
+        line-height: 1.8; 
+        text-align: justify; /* <--- AQUI: JUSTIFICADO */
+        text-justify: inter-word;
+        margin-bottom: 20px;
+    }}
     .highlight {{ color: #d4af37; font-style: italic; }}
 
-    /* --- COLUNA CENTRAL (Visor Gigante) --- */
+    /* --- COLUNA CENTRAL --- */
     .center-panel {{ display: flex; flex-direction: column; align-items: center; }}
     .visor-wrapper {{
-        position: relative; width: 100%; max-width: 850px; /* Bem maior agora */
+        position: relative; width: 100%; max-width: 850px;
         aspect-ratio: 16/9;
         background-image: {bg_visor_css}; background-size: cover; background-position: center;
         border-radius: 4px; box-shadow: 0 20px 50px rgba(0,0,0,0.8);
-        margin-bottom: 30px;
+        margin-bottom: 25px;
     }}
     .perfume-overlay {{
         position: absolute; top: 50%; left: 50%; transform: translate(-50%, -45%);
         height: 60%; width: auto; filter: drop-shadow(0 15px 20px rgba(0,0,0,0.7));
         transition: all 0.5s ease-in-out;
     }}
-    .perfume-overlay:hover {{ transform: translate(-50%, -48%) scale(1.03); }}
 
-    /* CONTROLES CENTRALIZADOS */
-    .controls-container {{ display: flex; gap: 20px; margin-bottom: 20px; }}
+    /* --- CORREÇÃO DOS BOTÕES --- */
     div.stButton > button {{
-        background: transparent; border: 1px solid #d4af37; color: #d4af37;
-        font-family: 'Cinzel', serif; padding: 0.8rem 2rem; min-width: 150px;
-        transition: 0.3s; text-transform: uppercase; letter-spacing: 2px;
+        white-space: nowrap; /* <--- PROIBE QUEBRA DE LINHA NO TEXTO DO BOTÃO */
+        background: transparent; 
+        border: 1px solid #d4af37; 
+        color: #d4af37;
+        font-family: 'Cinzel', serif; 
+        padding: 1rem 0; /* Padding vertical maior, horizontal automático */
+        width: 100%;
+        transition: 0.3s; 
+        text-transform: uppercase; 
+        letter-spacing: 2px;
+        font-size: 0.9rem;
     }}
     div.stButton > button:hover {{
         background: rgba(212, 175, 55, 0.15); color: #fff; border-color: #fff;
         box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
     }}
 
-    /* INFO CENTRALIZADA */
-    .info-container {{ text-align: center; }}
-    .prod-name {{ font-family: 'Cinzel', serif; font-size: 2.5rem; color: #fff; margin-bottom: 10px; }}
-    .prod-desc {{ font-family: 'Playfair Display', serif; color: #888; font-style: italic; margin-bottom: 15px; }}
+    /* INFO */
+    .info-container {{ text-align: center; margin-top: 10px; }}
+    .prod-name {{ font-family: 'Cinzel', serif; font-size: 2.5rem; color: #fff; margin-bottom: 5px; }}
+    .prod-desc {{ font-family: 'Playfair Display', serif; color: #888; font-style: italic; margin-bottom: 10px; }}
     .old {{ text-decoration: line-through; color: #555; font-size: 1.3rem; margin-right: 15px; }}
     .new {{ color: #d4af37; font-size: 3.5rem; font-weight: 700; }}
 
-    /* --- COLUNA DIREITA (Contato) --- */
+    /* --- COLUNA DIREITA --- */
     .right-panel {{
         padding: 30px; background: linear-gradient(145deg, #111, #0a0a0a);
         border: 1px solid #222; border-radius: 10px; text-align: center;
-        height: fit-content; margin-top: 50px; /* Alinha visualmente com o meio do visor */
+        margin-top: 80px;
     }}
-    .contact-title {{ font-family: 'Cinzel', serif; color: #fff; margin-bottom: 5px; font-size: 1.2rem; }}
     .contact-name {{ font-family: 'Cinzel', serif; font-size: 2rem; color: #d4af37; margin-bottom: 20px; }}
     .wa-button {{
         display: inline-block; width: 100%; padding: 15px 0;
@@ -138,15 +164,14 @@ st.markdown(f"""
 </style>
 """, unsafe_allow_html=True)
 
-# --- 7. RENDERIZAÇÃO DO LAYOUT EM GRID ---
+# --- 7. LAYOUT EM GRID ---
 
-# Header Full Width
 st.markdown('<div class="brand-header"><h1 class="brand-title">AURUM SCENTS</h1></div>', unsafe_allow_html=True)
 
-# Criação das 3 Colunas (Esquerda[3] | Centro[6] | Direita[3])
+# Colunas: Esquerda (3) | Centro (6) | Direita (3)
 col_L, col_C, col_R = st.columns([3, 6, 3], gap="large")
 
-# --- COLUNA ESQUERDA: Texto Institucional ---
+# --- ESQUERDA ---
 with col_L:
     st.markdown("""
     <div class="left-panel">
@@ -157,38 +182,39 @@ with col_L:
         <p class="panel-text">
             Nossa curadoria busca os ingredientes mais raros e as composições mais sofisticadas para despertar os <span class="highlight">prazeres da fragrância</span> em sua forma mais pura. Cada frasco em nossa vitrine é uma promessa de distinção e elegância atemporal.
         </p>
-        <br>
-        <p class="panel-text" style="font-size: 0.9rem; color: #666;">
-            Explore nossa coleção exclusiva e encontre a essência que define quem você é.
-        </p>
     </div>
     """, unsafe_allow_html=True)
 
-# --- COLUNA CENTRAL: Visor, Botões e Preço ---
+# --- CENTRO ---
 with col_C:
     st.markdown('<div class="center-panel">', unsafe_allow_html=True)
     
-    # 1. O Visor Gigante
+    # Visor
     if not visor_b64:
-         st.error("⚠️ ERRO CRÍTICO: Visor.jpg não encontrado. Verifique o terminal.")
+         # Mostra aviso VISUAL no lugar do visor se falhar
+         st.error(f"⚠️ ERRO: Imagem '{visor_path}' não encontrada. Veja o menu lateral!")
     else:
-        # Se a imagem do perfume falhar, usa um GIF transparente para não quebrar o layout
         src = f"data:image/png;base64,{img_produto_b64}" if img_produto_b64 else "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
         
+        # Aviso se o perfume falhar (mas mantendo o visor)
+        if not img_produto_b64:
+            st.warning(f"Imagem '{produto_atual['imagem']}' não encontrada. Confira o nome na barra lateral.")
+
         st.markdown(f"""
         <div class="visor-wrapper">
             <img src="{src}" class="perfume-overlay">
         </div>
         """, unsafe_allow_html=True)
 
-    # 2. Botões Centralizados (Usando colunas do Streamlit para alinhar os botões)
-    c_btn1, c_btn2, c_btn3 = st.columns([1, 2, 1])
+    # Botões alinhados
+    # Ajustei as proporções das colunas para dar mais espaço aos botões
+    c_btn1, c_btn2, c_btn3 = st.columns([1.2, 0.2, 1.2]) 
     with c_btn1: st.button("❮ ANTERIOR", on_click=anterior, use_container_width=True)
     with c_btn3: st.button("PRÓXIMO ❯", on_click=proximo, use_container_width=True)
 
-    # 3. Informações Centralizadas
+    # Info
     st.markdown(f"""
-        <div class="info-container" style="margin-top: 30px;">
+        <div class="info-container">
             <div class="prod-name">{produto_atual['nome']}</div>
             <div class="prod-desc">{produto_atual['desc']}</div>
             <div>
@@ -196,20 +222,21 @@ with col_C:
                 <span class="new">R$ {preco_atual:.2f}</span>
             </div>
         </div>
-    </div> """, unsafe_allow_html=True)
+    </div>
+    """, unsafe_allow_html=True)
 
-# --- COLUNA DIREITA: Contato ---
+# --- DIREITA ---
 with col_R:
     msg = f"Olá Jerry! Estou interessado no perfume {produto_atual['nome']}."
     link_wa = f"https://wa.me/5531992051499?text={msg.replace(' ', '%20')}"
     
     st.markdown(f"""
     <div class="right-panel">
-        <div class="contact-title">ATENDIMENTO EXCLUSIVO</div>
+        <div style="color:#fff; font-family:'Cinzel'; margin-bottom:10px;">ATENDIMENTO EXCLUSIVO</div>
         <div class="contact-name">Jerry Bombeta</div>
-        <div style="color: #888; margin-bottom: 20px;">Specialist Fragrance Consultant</div>
+        <div style="color: #888; margin-bottom: 20px; font-size:0.9rem;">Specialist Fragrance Consultant</div>
         <a href="{link_wa}" target="_blank" class="wa-button">
-            FALAR NO WHATSAPP 💬
+            FALAR NO WHATSAPP
         </a>
         <div style="margin-top: 20px; color: #d4af37;">📞 (31) 99205-1499</div>
     </div>
