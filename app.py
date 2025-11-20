@@ -7,39 +7,46 @@ st.set_page_config(
     page_title="Aurum Scents",
     page_icon="⚜️",
     layout="wide",
-    initial_sidebar_state="expanded" # Deixei expandido para você ver o debug
+    initial_sidebar_state="collapsed" # Barra lateral escondida
 )
 
 # --- 2. DADOS DOS PRODUTOS ---
+# ATENÇÃO: Os nomes dos arquivos devem bater EXATAMENTE com o que está na pasta.
 produtos = [
-    {"nome": "Royal Elixir Gold", "imagem": "imagens/Perfume1.png", "preco": 299.90, "desc": "Notas de ouro e especiarias raras."},
-    {"nome": "Black Orchid Intense", "imagem": "imagens/Perfume2.png", "preco": 350.00, "desc": "Orquídea negra profunda e misteriosa."},
-    {"nome": "Velvet Santal Wood", "imagem": "imagens/Perfume3.png", "preco": 420.00, "desc": "Sândalo aveludado e envolvente."},
-    {"nome": "Imperial Amber", "imagem": "imagens/Perfume4.png", "preco": 380.00, "desc": "Âmbar imperial com toque cítrico."},
+    {
+        "nome": "Royal Elixir Gold",
+        "imagem": "imagens/Perfume1.png", 
+        "preco": 299.90, 
+        "desc": "Notas de ouro e especiarias raras."
+    },
+    {
+        "nome": "Black Orchid Intense",
+        "imagem": "imagens/Perfume2.png", 
+        "preco": 350.00, 
+        "desc": "Orquídea negra profunda e misteriosa."
+    },
+    {
+        "nome": "Velvet Santal Wood",
+        "imagem": "imagens/Perfume3.png", 
+        "preco": 420.00, 
+        "desc": "Sândalo aveludado e envolvente."
+    },
+    {
+        "nome": "Imperial Amber",
+        "imagem": "imagens/Perfume4.png", 
+        "preco": 380.00, 
+        "desc": "Âmbar imperial com toque cítrico."
+    },
 ]
 
-# --- 3. FUNÇÕES E DIAGNÓSTICO (RAIO-X DE ARQUIVOS) ---
+# --- 3. FUNÇÕES UTILITÁRIAS ---
 def get_img_as_base64(file_path):
+    # Se o arquivo não existir, retorna None e o site não quebra
     if not os.path.exists(file_path):
         return None
     with open(file_path, "rb") as f:
         data = f.read()
     return base64.b64encode(data).decode('utf-8').replace('\n', '')
-
-# --- PAINEL DE DEBUG LATERAL (PARA ACHAR O ERRO DA IMAGEM) ---
-with st.sidebar:
-    st.header("🔧 Painel de Debug")
-    st.write("Este painel mostra o que o Python está vendo.")
-    
-    pasta_imagens = "imagens"
-    if os.path.exists(pasta_imagens):
-        st.success(f"✅ Pasta '{pasta_imagens}' encontrada!")
-        arquivos = os.listdir(pasta_imagens)
-        st.write("📂 Arquivos dentro da pasta:")
-        st.code(arquivos) # Mostra a lista exata de arquivos
-    else:
-        st.error(f"❌ A pasta '{pasta_imagens}' NÃO existe na raiz.")
-        st.write("Onde estou rodando:", os.getcwd())
 
 # --- 4. NAVEGAÇÃO ---
 if 'idx' not in st.session_state: st.session_state.idx = 0
@@ -49,7 +56,7 @@ def proximo():
 def anterior():
     st.session_state.idx = (st.session_state.idx - 1 + len(produtos)) % len(produtos)
 
-# --- 5. CARREGAMENTO ---
+# --- 5. CARREGAMENTO DE IMAGENS ---
 visor_path = "imagens/Visor.jpg"
 visor_b64 = get_img_as_base64(visor_path)
 
@@ -59,7 +66,8 @@ img_produto_b64 = get_img_as_base64(produto_atual["imagem"])
 preco_atual = produto_atual["preco"]
 preco_antigo = preco_atual + 100.00
 
-# --- 6. CSS (TEXTO JUSTIFICADO + CORREÇÃO BOTÃO) ---
+# --- 6. CSS DE LUXO (FINAL) ---
+# Se o visor carregar, usa ele. Se não, fundo escuro elegante.
 bg_visor_css = f"url('data:image/jpg;base64,{visor_b64}')" if visor_b64 else "#111"
 
 st.markdown(f"""
@@ -76,36 +84,25 @@ st.markdown(f"""
         background: linear-gradient(to right, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
         -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         margin: 0; letter-spacing: 5px;
+        text-shadow: 0px 4px 10px rgba(0,0,0,0.8);
     }}
 
-    /* --- COLUNA ESQUERDA (Texto Justificado) --- */
+    /* --- COLUNA ESQUERDA (Texto) --- */
     .left-panel {{ 
-        padding-right: 30px; 
-        border-right: 1px solid #222; 
-        height: 100%; 
-        display: flex;
-        flex-direction: column;
-        justify-content: center; /* Centraliza o bloco verticalmente */
+        padding-right: 30px; border-right: 1px solid #222; height: 100%; 
+        display: flex; flex-direction: column; justify-content: center;
     }}
     .panel-title {{ 
-        font-family: 'Cinzel', serif; 
-        font-size: 1.8rem; 
-        color: #fff; 
-        margin-bottom: 25px; 
-        text-align: center; /* Título centralizado */
+        font-family: 'Cinzel', serif; font-size: 1.8rem; color: #fff; 
+        margin-bottom: 25px; text-align: center; 
     }}
     .panel-text {{ 
-        font-family: 'Playfair Display', serif; 
-        font-size: 1.15rem; 
-        color: #aaa; 
-        line-height: 1.8; 
-        text-align: justify; /* <--- AQUI: JUSTIFICADO */
-        text-justify: inter-word;
-        margin-bottom: 20px;
+        font-family: 'Playfair Display', serif; font-size: 1.15rem; color: #aaa; 
+        line-height: 1.8; text-align: justify; text-justify: inter-word; margin-bottom: 20px;
     }}
     .highlight {{ color: #d4af37; font-style: italic; }}
 
-    /* --- COLUNA CENTRAL --- */
+    /* --- COLUNA CENTRAL (Visor) --- */
     .center-panel {{ display: flex; flex-direction: column; align-items: center; }}
     .visor-wrapper {{
         position: relative; width: 100%; max-width: 850px;
@@ -116,41 +113,34 @@ st.markdown(f"""
     }}
     .perfume-overlay {{
         position: absolute; top: 50%; left: 50%; transform: translate(-50%, -45%);
-        height: 60%; width: auto; filter: drop-shadow(0 15px 20px rgba(0,0,0,0.7));
+        height: 60%; width: auto; filter: drop-shadow(0 15px 20px rgba(0,0,0,0.8));
         transition: all 0.5s ease-in-out;
     }}
+    .perfume-overlay:hover {{ transform: translate(-50%, -48%) scale(1.03); }}
 
-    /* --- CORREÇÃO DOS BOTÕES --- */
+    /* --- BOTÕES --- */
     div.stButton > button {{
-        white-space: nowrap; /* <--- PROIBE QUEBRA DE LINHA NO TEXTO DO BOTÃO */
-        background: transparent; 
-        border: 1px solid #d4af37; 
-        color: #d4af37;
-        font-family: 'Cinzel', serif; 
-        padding: 1rem 0; /* Padding vertical maior, horizontal automático */
-        width: 100%;
-        transition: 0.3s; 
-        text-transform: uppercase; 
-        letter-spacing: 2px;
-        font-size: 0.9rem;
+        white-space: nowrap; background: transparent; 
+        border: 1px solid #d4af37; color: #d4af37;
+        font-family: 'Cinzel', serif; padding: 1rem 0; width: 100%;
+        transition: 0.3s; text-transform: uppercase; letter-spacing: 2px; font-size: 0.9rem;
     }}
     div.stButton > button:hover {{
         background: rgba(212, 175, 55, 0.15); color: #fff; border-color: #fff;
         box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
     }}
 
-    /* INFO */
+    /* --- INFO --- */
     .info-container {{ text-align: center; margin-top: 10px; }}
     .prod-name {{ font-family: 'Cinzel', serif; font-size: 2.5rem; color: #fff; margin-bottom: 5px; }}
     .prod-desc {{ font-family: 'Playfair Display', serif; color: #888; font-style: italic; margin-bottom: 10px; }}
     .old {{ text-decoration: line-through; color: #555; font-size: 1.3rem; margin-right: 15px; }}
     .new {{ color: #d4af37; font-size: 3.5rem; font-weight: 700; }}
 
-    /* --- COLUNA DIREITA --- */
+    /* --- COLUNA DIREITA (Contato) --- */
     .right-panel {{
         padding: 30px; background: linear-gradient(145deg, #111, #0a0a0a);
-        border: 1px solid #222; border-radius: 10px; text-align: center;
-        margin-top: 80px;
+        border: 1px solid #222; border-radius: 10px; text-align: center; margin-top: 80px;
     }}
     .contact-name {{ font-family: 'Cinzel', serif; font-size: 2rem; color: #d4af37; margin-bottom: 20px; }}
     .wa-button {{
@@ -160,7 +150,7 @@ st.markdown(f"""
         font-family: sans-serif; letter-spacing: 1px;
         box-shadow: 0 5px 15px rgba(37, 211, 102, 0.3); transition: 0.3s;
     }}
-    .wa-button:hover {{ transform: translateY(-3px); box-shadow: 0 10px 25px rgba(37, 211, 102, 0.5); color: white; }}
+    .wa-button:hover {{ transform: translateY(-3px); box-shadow: 0 10px 25px rgba(37, 211, 102, 0.5); color: white !important; }}
 </style>
 """, unsafe_allow_html=True)
 
@@ -168,10 +158,9 @@ st.markdown(f"""
 
 st.markdown('<div class="brand-header"><h1 class="brand-title">AURUM SCENTS</h1></div>', unsafe_allow_html=True)
 
-# Colunas: Esquerda (3) | Centro (6) | Direita (3)
 col_L, col_C, col_R = st.columns([3, 6, 3], gap="large")
 
-# --- ESQUERDA ---
+# ESQUERDA
 with col_L:
     st.markdown("""
     <div class="left-panel">
@@ -185,34 +174,27 @@ with col_L:
     </div>
     """, unsafe_allow_html=True)
 
-# --- CENTRO ---
+# CENTRO
 with col_C:
     st.markdown('<div class="center-panel">', unsafe_allow_html=True)
     
-    # Visor
-    if not visor_b64:
-         # Mostra aviso VISUAL no lugar do visor se falhar
-         st.error(f"⚠️ ERRO: Imagem '{visor_path}' não encontrada. Veja o menu lateral!")
-    else:
-        src = f"data:image/png;base64,{img_produto_b64}" if img_produto_b64 else "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
-        
-        # Aviso se o perfume falhar (mas mantendo o visor)
-        if not img_produto_b64:
-            st.warning(f"Imagem '{produto_atual['imagem']}' não encontrada. Confira o nome na barra lateral.")
+    # Lógica de Imagem do Perfume
+    # Se a imagem existir, gera o base64. Se não, usa um GIF transparente (invisível)
+    src = f"data:image/png;base64,{img_produto_b64}" if img_produto_b64 else "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+    
+    # Renderiza Visor + Perfume
+    st.markdown(f"""
+    <div class="visor-wrapper">
+        <img src="{src}" class="perfume-overlay">
+    </div>
+    """, unsafe_allow_html=True)
 
-        st.markdown(f"""
-        <div class="visor-wrapper">
-            <img src="{src}" class="perfume-overlay">
-        </div>
-        """, unsafe_allow_html=True)
-
-    # Botões alinhados
-    # Ajustei as proporções das colunas para dar mais espaço aos botões
+    # Botões
     c_btn1, c_btn2, c_btn3 = st.columns([1.2, 0.2, 1.2]) 
     with c_btn1: st.button("❮ ANTERIOR", on_click=anterior, use_container_width=True)
     with c_btn3: st.button("PRÓXIMO ❯", on_click=proximo, use_container_width=True)
 
-    # Info
+    # Info Produto
     st.markdown(f"""
         <div class="info-container">
             <div class="prod-name">{produto_atual['nome']}</div>
@@ -225,7 +207,7 @@ with col_C:
     </div>
     """, unsafe_allow_html=True)
 
-# --- DIREITA ---
+# DIREITA
 with col_R:
     msg = f"Olá Jerry! Estou interessado no perfume {produto_atual['nome']}."
     link_wa = f"https://wa.me/5531992051499?text={msg.replace(' ', '%20')}"
