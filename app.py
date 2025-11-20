@@ -219,3 +219,31 @@ with col_C:
     st.markdown(f"""
     <div class="visor-wrapper">
         <img src="{src}" class="perfume-overlay">
+    </div>
+    """, unsafe_allow_html=True)
+
+    c1, c2, c3 = st.columns([1, 0.2, 1])
+    with c1: st.button("❮ ANTERIOR", on_click=anterior)
+    with c3: st.button("PRÓXIMO ❯", on_click=proximo)
+
+    st.markdown(f"""
+        <div class="prod-name">{produto_atual['nome']}</div>
+        <div class="prod-desc">{produto_atual['desc']}</div>
+        <div class="price-box">
+            <span class="old">De R$ {preco_antigo:.2f}</span>
+            <span class="new">R$ {preco_atual:.2f}</span>
+        </div>
+    """, unsafe_allow_html=True)
+
+# DIREITA
+with col_R:
+    msg = f"Olá Jerry! Interesse no {produto_atual['nome']}"
+    link = f"https://wa.me/5531992051499?text={msg.replace(' ', '%20')}"
+    st.markdown(f"""
+    <div class="right-panel">
+        <div style="color:#d4af37; font-family:'Cinzel'; font-size:1.5rem;">JERRY BOMBETA</div>
+        <div style="color:#888; font-size:0.9rem;">Specialist Fragrance Consultant</div>
+        <a href="{link}" target="_blank" class="wa-btn">FALAR NO WHATSAPP</a>
+        <div style="margin-top:15px; color:#d4af37;">(31) 99205-1499</div>
+    </div>
+    """, unsafe_allow_html=True)
