@@ -2,230 +2,215 @@ import streamlit as st
 import base64
 import os
 
-# --- 1. CONFIGURAÇÃO DA PÁGINA ---
+# --- 1. CONFIGURAÇÃO DA PÁGINA (WIDE PARA 3 COLUNAS) ---
 st.set_page_config(
     page_title="Aurum Scents",
     page_icon="⚜️",
-    layout="centered",
+    layout="wide", # Usando a largura total
     initial_sidebar_state="collapsed"
 )
 
-# --- 2. DADOS DOS PRODUTOS (ATUALIZADO: SEM ESPAÇOS NOS NOMES) ---
-# Conforme seu print: Pasta 'imagens', Arquivo 'PerfumeX.png'
+# --- 2. DADOS DOS PRODUTOS ---
+# Nomes exatos conforme seu último print (sem espaços)
 produtos = [
-    {
-        "nome": "Royal Elixir Gold",
-        "imagem": "imagens/Perfume1.png", 
-        "preco": 299.90
-    },
-    {
-        "nome": "Black Orchid Intense",
-        "imagem": "imagens/Perfume2.png", 
-        "preco": 350.00
-    },
-    {
-        "nome": "Velvet Santal Wood",
-        "imagem": "imagens/Perfume3.png", 
-        "preco": 420.00
-    },
-     {
-        "nome": "Imperial Amber",
-        "imagem": "imagens/Perfume4.png", 
-        "preco": 380.00
-    },
-    # Adicione os outros seguindo o padrão (Perfume5.png, etc.)
+    {"nome": "Royal Elixir Gold", "imagem": "imagens/Perfume1.png", "preco": 299.90, "desc": "Notas de ouro e especiarias raras."},
+    {"nome": "Black Orchid Intense", "imagem": "imagens/Perfume2.png", "preco": 350.00, "desc": "Orquídea negra profunda e misteriosa."},
+    {"nome": "Velvet Santal Wood", "imagem": "imagens/Perfume3.png", "preco": 420.00, "desc": "Sândalo aveludado e envolvente."},
+    {"nome": "Imperial Amber", "imagem": "imagens/Perfume4.png", "preco": 380.00, "desc": "Âmbar imperial com toque cítrico."},
+    # Adicione os outros...
 ]
 
-# --- 3. FUNÇÕES UTILITÁRIAS ---
+# --- 3. FUNÇÕES UTILITÁRIAS E DIAGNÓSTICO ---
 def get_img_as_base64(file_path):
-    # Função robusta para carregar imagens
+    # --- DIAGNÓSTICO DE ERRO ---
     if not os.path.exists(file_path):
-        # Se não achar, retorna None. O código lá embaixo lida com isso.
+        print(f"\n--- ERRO CRÍTICO ---")
+        print(f"O arquivo NÃO foi encontrado no caminho: '{file_path}'")
+        try:
+            pasta = os.path.dirname(file_path)
+            conteudo = os.listdir(pasta)
+            print(f"Conteúdo real da pasta '{pasta}' no servidor:")
+            print(conteudo)
+            print("--------------------\n")
+        except Exception as e:
+             print(f"Não consegui ler a pasta: {e}")
         return None
+    # ---------------------------
+
     with open(file_path, "rb") as f:
         data = f.read()
-    # .replace('\n', '') é essencial para imagens grandes não quebrarem o HTML
     return base64.b64encode(data).decode('utf-8').replace('\n', '')
 
-# --- 4. NAVEGAÇÃO (GERENCIAMENTO DE ESTADO) ---
-if 'idx' not in st.session_state:
-    st.session_state.idx = 0
+# --- 4. NAVEGAÇÃO ---
+if 'idx' not in st.session_state: st.session_state.idx = 0
 
 def proximo():
-    if st.session_state.idx < len(produtos) - 1:
-        st.session_state.idx += 1
-    else:
-        st.session_state.idx = 0 # Loop volta ao início
-
+    st.session_state.idx = (st.session_state.idx + 1) % len(produtos)
 def anterior():
-    if st.session_state.idx > 0:
-        st.session_state.idx -= 1
-    else:
-        st.session_state.idx = len(produtos) - 1 # Loop vai pro final
+    st.session_state.idx = (st.session_state.idx - 1 + len(produtos)) % len(produtos)
 
-# --- 5. CARREGAMENTO DOS ATIVOS ---
-# Carrega o Visor
+# --- 5. CARREGAMENTO DE ATIVOS ---
 visor_path = "imagens/Visor.jpg"
 visor_b64 = get_img_as_base64(visor_path)
 
-# Carrega o Produto Atual
 produto_atual = produtos[st.session_state.idx]
 img_produto_b64 = get_img_as_base64(produto_atual["imagem"])
 
-# Preços
 preco_atual = produto_atual["preco"]
 preco_antigo = preco_atual + 100.00
 
-# --- 6. CSS DE LUXO (ESTÉTICA REFINADA) ---
-bg_visor_css = f"url('data:image/jpg;base64,{visor_b64}')" if visor_b64 else "none"
+# --- 6. CSS DE LUXO (NOVO LAYOUT) ---
+bg_visor_css = f"url('data:image/jpg;base64,{visor_b64}')" if visor_b64 else "#111"
 
 st.markdown(f"""
 <style>
-    /* Importar fontes elegantes */
     @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
 
-    /* Fundo Preto Absoluto e Cor Dourada Principal */
-    .stApp {{
-        background-color: #000000;
-        color: #d4af37;
-    }}
-    
-    /* Remove padding excessivo do topo */
-    .block-container {{
-        padding-top: 2rem;
-    }}
+    .stApp {{ background-color: #000000; color: #d4af37; }}
+    .block-container {{ padding-top: 1rem; max-width: 1400px !important; }}
 
-    /* --- HEADER --- */
-    .brand-header {{ text-align: center; margin-bottom: 25px; }}
+    /* HEADER */
+    .brand-header {{ text-align: center; margin-bottom: 40px; }}
     .brand-title {{
-        font-family: 'Cinzel', serif;
-        font-size: 3rem;
-        /* Gradiente dourado no texto */
+        font-family: 'Cinzel', serif; font-size: 4rem;
         background: linear-gradient(to right, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        margin: 0; letter-spacing: 3px;
-    }}
-    .brand-sub {{
-        font-family: 'Playfair Display', serif; color: #888;
-        letter-spacing: 4px; font-size: 0.75rem; margin-top: 8px;
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        margin: 0; letter-spacing: 5px;
     }}
 
-    /* --- VISOR E IMAGEM --- */
+    /* --- COLUNA ESQUERDA (Texto) --- */
+    .left-panel {{ padding-right: 20px; border-right: 1px solid #222; height: 100%; }}
+    .panel-title {{ font-family: 'Cinzel', serif; font-size: 1.5rem; color: #fff; margin-bottom: 20px; }}
+    .panel-text {{ font-family: 'Playfair Display', serif; font-size: 1.1rem; color: #aaa; line-height: 1.6; }}
+    .highlight {{ color: #d4af37; font-style: italic; }}
+
+    /* --- COLUNA CENTRAL (Visor Gigante) --- */
+    .center-panel {{ display: flex; flex-direction: column; align-items: center; }}
     .visor-wrapper {{
-        display: flex; justify-content: center; margin-bottom: 20px;
-    }}
-    .visor-frame {{
-        position: relative;
-        width: 100%; max-width: 600px;
+        position: relative; width: 100%; max-width: 850px; /* Bem maior agora */
         aspect-ratio: 16/9;
-        background-image: {bg_visor_css};
-        background-size: cover; background-position: center;
-        border-radius: 4px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        background-image: {bg_visor_css}; background-size: cover; background-position: center;
+        border-radius: 4px; box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+        margin-bottom: 30px;
     }}
     .perfume-overlay {{
-        position: absolute;
-        top: 50%; left: 50%;
-        transform: translate(-50%, -45%); /* Centraliza na luz */
-        height: 58%; width: auto;
-        filter: drop-shadow(0 10px 15px rgba(0,0,0,0.6));
+        position: absolute; top: 50%; left: 50%; transform: translate(-50%, -45%);
+        height: 60%; width: auto; filter: drop-shadow(0 15px 20px rgba(0,0,0,0.7));
         transition: all 0.5s ease-in-out;
     }}
-    .perfume-overlay:hover {{ transform: translate(-50%, -47%) scale(1.03); }}
+    .perfume-overlay:hover {{ transform: translate(-50%, -48%) scale(1.03); }}
 
-    /* --- NOVOS BOTÕES DE LUXO --- */
+    /* CONTROLES CENTRALIZADOS */
+    .controls-container {{ display: flex; gap: 20px; margin-bottom: 20px; }}
     div.stButton > button {{
-        background-color: transparent;
-        border: 1px solid #d4af37; /* Borda dourada fina */
-        color: #d4af37; /* Texto dourado */
-        font-family: 'Cinzel', serif;
-        font-size: 0.9rem;
-        letter-spacing: 2px;
-        padding: 0.6rem 1rem;
-        width: 100%;
-        transition: all 0.3s ease;
-        text-transform: uppercase;
+        background: transparent; border: 1px solid #d4af37; color: #d4af37;
+        font-family: 'Cinzel', serif; padding: 0.8rem 2rem; min-width: 150px;
+        transition: 0.3s; text-transform: uppercase; letter-spacing: 2px;
     }}
     div.stButton > button:hover {{
-        background-color: rgba(212, 175, 55, 0.15); /* Fundo dourado sutil ao passar o mouse */
-        box-shadow: 0 0 15px rgba(212, 175, 55, 0.3); /* Brilho externo */
-        border-color: #fff;
-        color: #fff;
+        background: rgba(212, 175, 55, 0.15); color: #fff; border-color: #fff;
+        box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
     }}
 
-    /* --- PREÇO E INFO --- */
-    .info-container {{ text-align: center; margin-top: 15px; }}
-    .prod-name {{
-        font-family: 'Cinzel', serif; font-size: 1.8rem; color: #fff; margin-bottom: 10px;
-    }}
-    .price-box {{ font-family: 'Playfair Display', serif; }}
-    .old {{ text-decoration: line-through; color: #666; font-size: 1.1rem; margin-right: 15px; }}
-    .new {{ color: #d4af37; font-size: 2.8rem; font-weight: 700; }}
+    /* INFO CENTRALIZADA */
+    .info-container {{ text-align: center; }}
+    .prod-name {{ font-family: 'Cinzel', serif; font-size: 2.5rem; color: #fff; margin-bottom: 10px; }}
+    .prod-desc {{ font-family: 'Playfair Display', serif; color: #888; font-style: italic; margin-bottom: 15px; }}
+    .old {{ text-decoration: line-through; color: #555; font-size: 1.3rem; margin-right: 15px; }}
+    .new {{ color: #d4af37; font-size: 3.5rem; font-weight: 700; }}
 
-    /* --- WHATSAPP FLUTUANTE --- */
-    .wa-float {{
-        position: fixed; bottom: 25px; right: 25px;
-        background: linear-gradient(45deg, #25d366, #128c7e);
-        color: #fff; padding: 12px 25px; border-radius: 50px;
-        text-decoration: none; font-weight: bold; font-family: sans-serif;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.4); z-index: 99;
-        border: 1px solid #25d366; transition: 0.3s;
+    /* --- COLUNA DIREITA (Contato) --- */
+    .right-panel {{
+        padding: 30px; background: linear-gradient(145deg, #111, #0a0a0a);
+        border: 1px solid #222; border-radius: 10px; text-align: center;
+        height: fit-content; margin-top: 50px; /* Alinha visualmente com o meio do visor */
     }}
-    .wa-float:hover {{ transform: scale(1.05); color: white; box-shadow: 0 0 20px rgba(37, 211, 102, 0.6); }}
+    .contact-title {{ font-family: 'Cinzel', serif; color: #fff; margin-bottom: 5px; font-size: 1.2rem; }}
+    .contact-name {{ font-family: 'Cinzel', serif; font-size: 2rem; color: #d4af37; margin-bottom: 20px; }}
+    .wa-button {{
+        display: inline-block; width: 100%; padding: 15px 0;
+        background: linear-gradient(45deg, #25d366, #128c7e); color: white;
+        border-radius: 50px; text-decoration: none; font-weight: bold;
+        font-family: sans-serif; letter-spacing: 1px;
+        box-shadow: 0 5px 15px rgba(37, 211, 102, 0.3); transition: 0.3s;
+    }}
+    .wa-button:hover {{ transform: translateY(-3px); box-shadow: 0 10px 25px rgba(37, 211, 102, 0.5); color: white; }}
 </style>
 """, unsafe_allow_html=True)
 
-# --- 7. RENDERIZAÇÃO DO LAYOUT ---
+# --- 7. RENDERIZAÇÃO DO LAYOUT EM GRID ---
 
-# Header
-st.markdown("""
-    <div class="brand-header">
-        <div class="brand-title">AURUM SCENTS</div>
-        <div class="brand-sub">LUXURY FRAGRANCES</div>
-    </div>
-""", unsafe_allow_html=True)
+# Header Full Width
+st.markdown('<div class="brand-header"><h1 class="brand-title">AURUM SCENTS</h1></div>', unsafe_allow_html=True)
 
-# Área Principal (Visor)
-# Verifica se o visor carregou antes de tentar mostrar
-if not visor_b64:
-    st.error("⚠️ Erro: Não encontrei 'imagens/Visor.jpg'. Verifique a pasta no GitHub.")
-else:
-    # Se a imagem do perfume falhar, usa um placeholder transparente
-    src = f"data:image/png;base64,{img_produto_b64}" if img_produto_b64 else "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
-    
-    st.markdown(f"""
-    <div class="visor-wrapper">
-        <div class="visor-frame">
-            <img src="{src}" class="perfume-overlay">
-        </div>
+# Criação das 3 Colunas (Esquerda[3] | Centro[6] | Direita[3])
+col_L, col_C, col_R = st.columns([3, 6, 3], gap="large")
+
+# --- COLUNA ESQUERDA: Texto Institucional ---
+with col_L:
+    st.markdown("""
+    <div class="left-panel">
+        <div class="panel-title">A Essência do Luxo</div>
+        <p class="panel-text">
+            Na <span class="highlight">Aurum Scents</span>, acreditamos que uma fragrância não é apenas um aroma, é uma assinatura invisível, uma memória líquida.
+        </p>
+        <p class="panel-text">
+            Nossa curadoria busca os ingredientes mais raros e as composições mais sofisticadas para despertar os <span class="highlight">prazeres da fragrância</span> em sua forma mais pura. Cada frasco em nossa vitrine é uma promessa de distinção e elegância atemporal.
+        </p>
+        <br>
+        <p class="panel-text" style="font-size: 0.9rem; color: #666;">
+            Explore nossa coleção exclusiva e encontre a essência que define quem você é.
+        </p>
     </div>
     """, unsafe_allow_html=True)
 
-# Botões de Navegação (Centralizados abaixo do visor)
-c1, c2, c3 = st.columns([1, 2, 1])
-with c1:
-    st.button("❮ ANTERIOR", on_click=anterior)
-with c3:
-    st.button("PRÓXIMO ❯", on_click=proximo)
-
-# Informações e Preço
-st.markdown(f"""
-    <div class="info-container">
-        <div class="prod-name">{produto_atual['nome']}</div>
-        <div class="price-box">
-            <span class="old">De R$ {preco_antigo:.2f}</span>
-            <span class="new">R$ {preco_atual:.2f}</span>
-        </div>
-    </div>
-""", unsafe_allow_html=True)
-
-# Botão WhatsApp
-msg = f"Olá Jerry! Tenho interesse no perfume {produto_atual['nome']}."
-link_wa = f"https://wa.me/5531992051499?text={msg.replace(' ', '%20')}"
-st.markdown(f"""
-    <a href="{link_wa}" target="_blank" class="wa-float">
-        Falar com Jerry Bombeta 💬
-    </a>
-""", unsafe_allow_html=True)
+# --- COLUNA CENTRAL: Visor, Botões e Preço ---
+with col_C:
+    st.markdown('<div class="center-panel">', unsafe_allow_html=True)
     
+    # 1. O Visor Gigante
+    if not visor_b64:
+         st.error("⚠️ ERRO CRÍTICO: Visor.jpg não encontrado. Verifique o terminal.")
+    else:
+        # Se a imagem do perfume falhar, usa um GIF transparente para não quebrar o layout
+        src = f"data:image/png;base64,{img_produto_b64}" if img_produto_b64 else "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+        
+        st.markdown(f"""
+        <div class="visor-wrapper">
+            <img src="{src}" class="perfume-overlay">
+        </div>
+        """, unsafe_allow_html=True)
+
+    # 2. Botões Centralizados (Usando colunas do Streamlit para alinhar os botões)
+    c_btn1, c_btn2, c_btn3 = st.columns([1, 2, 1])
+    with c_btn1: st.button("❮ ANTERIOR", on_click=anterior, use_container_width=True)
+    with c_btn3: st.button("PRÓXIMO ❯", on_click=proximo, use_container_width=True)
+
+    # 3. Informações Centralizadas
+    st.markdown(f"""
+        <div class="info-container" style="margin-top: 30px;">
+            <div class="prod-name">{produto_atual['nome']}</div>
+            <div class="prod-desc">{produto_atual['desc']}</div>
+            <div>
+                <span class="old">De R$ {preco_antigo:.2f}</span>
+                <span class="new">R$ {preco_atual:.2f}</span>
+            </div>
+        </div>
+    </div> """, unsafe_allow_html=True)
+
+# --- COLUNA DIREITA: Contato ---
+with col_R:
+    msg = f"Olá Jerry! Estou interessado no perfume {produto_atual['nome']}."
+    link_wa = f"https://wa.me/5531992051499?text={msg.replace(' ', '%20')}"
+    
+    st.markdown(f"""
+    <div class="right-panel">
+        <div class="contact-title">ATENDIMENTO EXCLUSIVO</div>
+        <div class="contact-name">Jerry Bombeta</div>
+        <div style="color: #888; margin-bottom: 20px;">Specialist Fragrance Consultant</div>
+        <a href="{link_wa}" target="_blank" class="wa-button">
+            FALAR NO WHATSAPP 💬
+        </a>
+        <div style="margin-top: 20px; color: #d4af37;">📞 (31) 99205-1499</div>
+    </div>
+    """, unsafe_allow_html=True)
