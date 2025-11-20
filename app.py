@@ -81,7 +81,7 @@ visor_b64 = get_img_as_base64(path_visor)
 preco_atual = produto_atual["preco"]
 preco_antigo = preco_atual + (100 if preco_atual > 0 else 0)
 
-# --- 5. CSS DEFINITIVO (COM AJUSTE FINO DA MÁSCARA) ---
+# --- 5. CSS DEFINITIVO (COM AJUSTE DE POSIÇÃO DO PERFUME) ---
 bg_visor_css = f"url('data:image/png;base64,{visor_b64}')" if visor_b64 else "#222"
 
 st.markdown(f"""
@@ -117,22 +117,22 @@ st.markdown(f"""
         border-radius: 4px; box-shadow: 0 25px 50px rgba(0,0,0,0.9);
     }}
     
-    /* MÁSCARA AJUSTADA: Reduzi a altura para não cobrir a plaquinha */
+    /* MÁSCARA */
     .visor-mask {{
         position: absolute;
         top: 8%; left: 18.3%; width: 63.4%; 
-        height: 66%; /* <--- AJUSTE AQUI: Altura reduzida para parar antes da placa */
+        height: 66%; 
         overflow: hidden;
-        display: flex; align-items: flex-end; justify-content: center;
+        display: flex; align-items: flex-end; justify-content: center; /* Centraliza horizontalmente */
     }}
 
     .perfume-img {{
-        /* O perfume ocupa 85% da nova área da máscara */
         height: 85%; width: auto;
         mix-blend-mode: multiply;
         filter: contrast(1.1) brightness(0.95);
         transition: transform 0.5s ease;
-        margin-bottom: 1%; 
+        /* AJUSTE AQUI: Margem inferior para levantar o perfume da plaquinha */
+        margin-bottom: 2.5%; 
     }}
     .perfume-img:hover {{ transform: scale(1.05); mix-blend-mode: normal; }}
 
