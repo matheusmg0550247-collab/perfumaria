@@ -10,32 +10,30 @@ st.set_page_config(
 )
 
 # --- CONFIGURAÇÃO DOS PRODUTOS ---
-# Aqui você define seus produtos. 
-# Certifique-se que as imagens estão dentro da pasta 'images/' 
-# e que os nomes dos arquivos (ex: perfume1.png) batem exatamente.
+# Certifique-se que as imagens dos perfumes também estão na pasta 'images'
 produtos = [
     {
         "nome": "Royal Elixir Gold",
-        "imagem": "images/perfume1.png", # Substitua pelo nome real do arquivo na pasta images
+        "imagem": "images/perfume1.png", 
         "preco": 299.90
     },
     {
         "nome": "Black Orchid Intense",
-        "imagem": "images/perfume2.png", # Substitua pelo nome real do arquivo na pasta images
+        "imagem": "images/perfume2.png", 
         "preco": 350.00
     },
     {
         "nome": "Velvet Santal Wood",
-        "imagem": "images/perfume3.png", # Substitua pelo nome real do arquivo na pasta images
+        "imagem": "images/perfume3.png", 
         "preco": 420.00
     },
-    # Adicione mais produtos copiando o bloco acima
 ]
 
 # --- FUNÇÕES UTILITÁRIAS ---
 
 def get_img_as_base64(file_path):
     """Converte imagem para base64 para usar no HTML/CSS"""
+    # Verifica se o arquivo existe antes de tentar abrir
     if not os.path.exists(file_path):
         return None
     with open(file_path, "rb") as f:
@@ -60,11 +58,14 @@ def anterior():
 
 # --- CARREGAMENTO DE RECURSOS ---
 
-# 1. Carregar Fundo do Visor (Visor.png na raiz)
-visor_path = "Visor.png" 
+# 1. Carregar Fundo do Visor
+# CORREÇÃO AQUI: Agora ele busca dentro da pasta 'images/'
+visor_path = "images/Visor.png" 
+
+# Nota de segurança: Se o seu arquivo for .jpg, mude a linha acima para "images/Visor.jpg"
 visor_b64 = get_img_as_base64(visor_path)
 
-# 2. Carregar Imagem do Produto Atual (Pasta images/)
+# 2. Carregar Imagem do Produto Atual
 produto_atual = produtos[st.session_state.idx]
 img_produto_path = produto_atual["imagem"]
 img_produto_b64 = get_img_as_base64(img_produto_path)
@@ -74,22 +75,19 @@ preco_atual = produto_atual["preco"]
 preco_antigo = preco_atual + 100.00
 
 # --- ESTILIZAÇÃO CSS (LUXO / OLD MONEY) ---
-# Define o background do visor. Se a imagem não existir, usa um cinza escuro.
 bg_visor_css = f"url('data:image/png;base64,{visor_b64}')" if visor_b64 else "none"
 bg_color_fallback = "#2c2c2c" if not visor_b64 else "transparent"
 
 st.markdown(f"""
 <style>
-    /* Importando fontes elegantes */
     @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
 
-    /* Fundo Geral do App */
     .stApp {{
         background-color: #0e0e0e;
-        color: #e5c15d; /* Dourado suave */
+        color: #e5c15d;
     }}
 
-    /* LOGO DA EMPRESA */
+    /* LOGO */
     .logo-container {{
         text-align: center;
         margin-bottom: 20px;
@@ -106,7 +104,6 @@ st.markdown(f"""
         letter-spacing: 4px;
         text-transform: uppercase;
         margin: 0;
-        text-shadow: 0px 4px 10px rgba(0,0,0,0.5);
     }}
     .brand-subtitle {{
         font-family: 'Playfair Display', serif;
@@ -116,7 +113,7 @@ st.markdown(f"""
         margin-top: -5px;
     }}
 
-    /* VISOR CENTRAL */
+    /* VISOR */
     .visor-stage {{
         display: flex;
         justify-content: center;
@@ -128,33 +125,27 @@ st.markdown(f"""
         position: relative;
         width: 100%;
         max-width: 500px;
-        aspect-ratio: 1 / 1.1; /* Ajuste a proporção conforme sua imagem Visor.png */
+        aspect-ratio: 1 / 1.1; 
         background-image: {bg_visor_css};
         background-color: {bg_color_fallback};
         background-size: contain;
         background-repeat: no-repeat;
         background-position: center;
-        
         display: flex;
         align-items: center;
         justify-content: center;
     }}
 
-    /* Imagem do perfume flutuando no visor */
     .perfume-display {{
-        width: 50%; /* O perfume ocupa 50% da largura do visor */
+        width: 50%; 
         height: auto;
         z-index: 10;
         filter: drop-shadow(0px 15px 10px rgba(0,0,0,0.6));
         transition: transform 0.5s ease;
-        margin-top: -5%; /* Ajuste fino vertical */
+        margin-top: -5%;
     }}
     
-    .perfume-display:hover {{
-        transform: scale(1.05);
-    }}
-
-    /* ÁREA DE PREÇO */
+    /* PREÇO */
     .price-tag {{
         text-align: center;
         font-family: 'Playfair Display', serif;
@@ -178,7 +169,7 @@ st.markdown(f"""
         margin-bottom: 5px;
     }}
 
-    /* BOTÕES PERSONALIZADOS */
+    /* BOTÕES */
     div.stButton > button {{
         background-color: transparent;
         border: 1px solid #e5c15d;
@@ -186,16 +177,14 @@ st.markdown(f"""
         font-family: 'Cinzel', serif;
         width: 100%;
         border-radius: 0px;
-        transition: 0.3s;
     }}
     div.stButton > button:hover {{
         background-color: #e5c15d;
         color: #000;
         border-color: #fff;
-        box-shadow: 0 0 10px #e5c15d;
     }}
 
-    /* FOOTER DE CONTATO (JERRY) */
+    /* FOOTER JERRY */
     .footer-box {{
         margin-top: 50px;
         padding: 30px;
@@ -203,12 +192,6 @@ st.markdown(f"""
         border-top: 1px solid #333;
         text-align: center;
         border-radius: 10px;
-    }}
-    .contact-label {{
-        color: #888;
-        font-size: 0.9rem;
-        text-transform: uppercase;
-        letter-spacing: 2px;
     }}
     .contact-name {{
         font-family: 'Cinzel', serif;
@@ -226,21 +209,18 @@ st.markdown(f"""
         font-weight: bold;
         font-family: sans-serif;
         margin-top: 10px;
-        box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
-        transition: 0.3s;
     }}
     .whatsapp-btn:hover {{
         background-color: #1ebd59;
-        transform: translateY(-2px);
         color: white !important;
         text-decoration: none;
     }}
 </style>
 """, unsafe_allow_html=True)
 
-# --- RENDERIZAÇÃO VISUAL (FRONT-END) ---
+# --- RENDERIZAÇÃO (FRONT-END) ---
 
-# 1. Header e Logo
+# 1. Header
 st.markdown("""
     <div class="logo-container">
         <div class="brand-name">AURUM SCENTS</div>
@@ -248,11 +228,11 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
-# 2. Visor e Produto
+# 2. Visor
 if not visor_b64:
-    st.error("⚠️ Erro: Arquivo 'Visor.png' não encontrado na raiz do projeto.")
+    # Mensagem de erro mais clara caso o arquivo ainda não seja encontrado
+    st.error(f"⚠️ Erro: Não encontrei o arquivo '{visor_path}'. Verifique se o nome está exato (Visor.png vs Visor.jpg) dentro da pasta images.")
 else:
-    # Define a imagem do perfume (ou placeholder se falhar)
     src_img = f"data:image/png;base64,{img_produto_b64}" if img_produto_b64 else "https://via.placeholder.com/300x500/000000/FFFFFF?text=Sem+Imagem"
     
     st.markdown(f"""
@@ -263,14 +243,14 @@ else:
         </div>
     """, unsafe_allow_html=True)
 
-# 3. Navegação (Botões Laterais)
+# 3. Navegação
 col1, col2, col3 = st.columns([1, 2, 1])
 with col1:
     st.button("❮ ANTERIOR", on_click=anterior)
 with col3:
     st.button("PRÓXIMO ❯", on_click=proximo)
 
-# 4. Informações do Produto
+# 4. Info Produto
 st.markdown(f"""
     <div class="price-tag">
         <div class="product-title">{produto_atual['nome']}</div>
@@ -279,17 +259,15 @@ st.markdown(f"""
     </div>
 """, unsafe_allow_html=True)
 
-# 5. Footer (Contato Jerry)
-# Formata o link do WhatsApp
-telefone = "5531992051499"
+# 5. Footer
 msg = f"Olá Jerry! Gostaria de comprar o perfume {produto_atual['nome']}."
-link_wa = f"https://wa.me/{telefone}?text={msg.replace(' ', '%20')}"
+link_wa = f"https://wa.me/5531992051499?text={msg.replace(' ', '%20')}"
 
 st.markdown(f"""
     <div class="footer-box">
-        <div class="contact-label">Atendimento Exclusivo</div>
+        <div style="color:#888; letter-spacing:2px; font-size:0.8em;">ATENDIMENTO EXCLUSIVO</div>
         <div class="contact-name">Jerry Bombeta</div>
-        <div>📞 (31) 99205-1499</div>
+        <div style="color:#d4af37; font-weight:bold;">📞 (31) 99205-1499</div>
         <br>
         <a href="{link_wa}" target="_blank" class="whatsapp-btn">
             COMPRAR AGORA PELO WHATSAPP
