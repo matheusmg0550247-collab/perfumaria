@@ -1,6 +1,7 @@
 import streamlit as st
 import base64
 import os
+import re
 
 # --- 1. CONFIGURAÇÃO DA PÁGINA ---
 st.set_page_config(
@@ -10,77 +11,113 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# --- 2. FUNÇÃO DE BUSCA INTELIGENTE ---
-def encontrar_imagem_na_marra(numero_perfume):
-    """
-    Vasculha a pasta 'imagens' procurando algo que pareça com o perfume desejado.
-    Ex: Se procuro perfume 1, ele aceita 'Perfume1.png', 'perfume 1.jpg', 'foto_perfume_1.jpeg'
-    """
-    # 1. Tenta achar a pasta (testa minúsculo e maiúsculo)
-    pasta = "imagens"
-    if not os.path.exists(pasta):
-        pasta = "Imagens" # Tenta com I maiúsculo
-        if not os.path.exists(pasta):
-            return None, f"Pasta 'imagens' não encontrada."
+# --- 2. CATÁLOGO COMPLETO (16 ITENS) ---
+# Criei nomes e preços baseados na estética Old Money/Luxo
+CATALOGO = {
+    1: {"nome": "Royal Elixir Gold", "preco": 299.90, "desc": "Notas de ouro, mel e especiarias raras."},
+    2: {"nome": "Black Orchid Intense", "preco": 350.00, "desc": "Orquídea negra profunda e misteriosa."},
+    3: {"nome": "Velvet Santal Wood", "preco": 420.00, "desc": "Sândalo aveludado com toque de couro."},
+    4: {"nome": "Imperial Amber", "preco": 380.00, "desc": "Âmbar imperial com raspas cítricas."},
+    5: {"nome": "Club de Nuit Intense", "preco": 250.00, "desc": "Cítrico amadeirado marcante e viril."},
+    6: {"nome": "Midnight Saffron", "preco": 310.00, "desc": "Açafrão noturno com fundo de tabaco."},
+    7: {"nome": "Oceanic Leather", "preco": 275.00, "desc": "Couro italiano com brisa marinha."},
+    8: {"nome": "Rose of Dubai", "preco": 340.00, "desc": "Rosas damascenas colhidas ao amanhecer."},
+    9: {"nome": "Emerald Vetiver", "preco": 290.00, "desc": "Vetiver fresco com notas verdes vibrantes."},
+    10: {"nome": "Golden Tobacco", "preco": 450.00, "desc": "Folhas de tabaco cubano e baunilha."},
+    11: {"nome": "Pure Musk Absolute", "preco": 220.00, "desc": "Almíscar puro, limpo e sofisticado."},
+    12: {"nome": "Celestial Oud", "preco": 550.00, "desc": "Oud raro envelhecido em barris de carvalho."},
+    13: {"nome": "Spice Route", "preco": 260.00, "desc": "Pimenta rosa, cardamomo e noz-moscada."},
+    14: {"nome": "Vanilla Noir", "preco": 280.00, "desc": "Baunilha negra de Madagascar defumada."},
+    15: {"nome": "Cedar & Cognac", "preco": 330.00, "desc": "Cedro nobre banhado em conhaque envelhecido."},
+    16: {"nome": "Majestic Iris", "preco": 360.00, "desc": "Íris atalcada com fundo amadeirado suave."},
+}
 
-    # 2. Lista todos os arquivos da pasta
-    try:
-        arquivos = os.listdir(pasta)
-    except:
-        return None, "Erro ao ler pasta."
-
-    # 3. Procura o arquivo
-    busca = str(numero_perfume) # Procura pelo número "1", "2", etc.
+# --- 3. VARREDURA INTELIGENTE DE ARQUIVOS ---
+def carregar_produtos_automaticamente():
+    produtos_encontrados = []
+    # Garante que acha a pasta imagens onde quer que ela esteja
+    pasta_atual = os.path.dirname(os.path.abspath(__file__))
+    pasta_imagens = os.path.join(pasta_atual, "imagens")
     
-    for arquivo in arquivos:
-        nome_lower = arquivo.lower()
-        # Se tiver "perfume" E o número desejado no nome, e for imagem...
-        if "perfume" in nome_lower and busca in nome_lower:
-            if nome_lower.endswith(('.png', '.jpg', '.jpeg', '.webp')):
-                return os.path.join(pasta, arquivo), None # ACHOU!
+    if not os.path.exists(pasta_imagens):
+        st.error(f"❌ Pasta 'imagens' não encontrada em: {pasta_imagens}")
+        return []
 
-    # Se chegou aqui, não achou
-    return None, f"Não achei perfume {numero_perfume} na lista: {arquivos}"
+    arquivos = os.listdir(pasta_imagens)
+    
+    # Função para pegar o número do nome do arquivo (ex: "Perfume 10.jpg" -> 10)
+    def extrair_numero(texto):
+        nums = re.findall(r'\d+', texto)
+        return int(nums[0]) if nums else 999
+
+    # Filtra arquivos de imagem que tenham "perfume" no nome
+    arquivos_validos = [f for f in arquivos if "perfume" in f.lower() and f.lower().endswith(('.jpg', '.jpeg', '.png', '.webp'))]
+    
+    # Ordena pelo número (1, 2, ... 10, 11)
+    arquivos_ordenados = sorted(arquivos_validos, key=extrair_numero)
+
+    ids_processados = set() # Para evitar duplicatas (ex: Perfume11.jpg e Perfume11.png)
+
+    for arquivo in arquivos_ordenados:
+        numero = extrair_numero(arquivo)
+        
+        # Se já processamos esse número (ex: pegou o jpg, ignora o png), pula
+        if numero in ids_processados:
+            continue
+            
+        # Pega dados do catálogo ou usa genérico se passar de 16
+        dados = CATALOGO.get(numero, {
+            "nome": f"Edição Limitada Nº {numero}",
+            "preco": 0.00,
+            "desc": "Fragrância exclusiva."
+        })
+        
+        produtos_encontrados.append({
+            "id": numero,
+            "nome": dados["nome"],
+            "arquivo": os.path.join(pasta_imagens, arquivo),
+            "preco": dados["preco"],
+            "desc": dados["desc"]
+        })
+        ids_processados.add(numero)
+        
+    return produtos_encontrados
 
 def get_img_as_base64(caminho):
-    if not caminho: return None
+    if not caminho or not os.path.exists(caminho): return None
     try:
-        with open(caminho, "rb") as f:
-            data = f.read()
+        with open(caminho, "rb") as f: data = f.read()
         return base64.b64encode(data).decode('utf-8')
-    except:
-        return None
+    except: return None
 
-# --- 3. DADOS SIMPLIFICADOS ---
-# Agora só indicamos o NÚMERO do perfume. O código se vira para achar a foto.
-produtos = [
-    {"id": 1, "nome": "Royal Elixir Gold", "preco": 299.90, "desc": "Notas de ouro e especiarias raras."},
-    {"id": 2, "nome": "Black Orchid Intense", "preco": 350.00, "desc": "Orquídea negra profunda e misteriosa."},
-    {"id": 3, "nome": "Velvet Santal Wood", "preco": 420.00, "desc": "Sândalo aveludado e envolvente."},
-    {"id": 4, "nome": "Imperial Amber", "preco": 380.00, "desc": "Âmbar imperial com toque cítrico."},
-]
+# --- 4. INICIALIZAÇÃO ---
+produtos = carregar_produtos_automaticamente()
 
-# --- 4. NAVEGAÇÃO ---
+if not produtos:
+    st.error("Nenhum perfume encontrado. Verifique se a pasta 'imagens' está junto com o arquivo app.py")
+    st.stop()
+
+# Navegação
 if 'idx' not in st.session_state: st.session_state.idx = 0
 def proximo(): st.session_state.idx = (st.session_state.idx + 1) % len(produtos)
 def anterior(): st.session_state.idx = (st.session_state.idx - 1 + len(produtos)) % len(produtos)
 
-# --- 5. CARREGAMENTO ---
+# Dados atuais
 produto_atual = produtos[st.session_state.idx]
+img_produto_b64 = get_img_as_base64(produto_atual["arquivo"])
 
-# Busca Visor
-path_visor = "imagens/Visor.jpg" 
-if not os.path.exists(path_visor): path_visor = "imagens/Visor.png" # Tenta png
+# Busca Visor (Tenta jpg ou png)
+path_base = os.path.dirname(os.path.abspath(__file__))
+path_visor = os.path.join(path_base, "imagens", "Visor.jpg")
+if not os.path.exists(path_visor):
+     path_visor = os.path.join(path_base, "imagens", "Visor.png")
+     
 visor_b64 = get_img_as_base64(path_visor)
 
-# Busca Perfume (Usa a função inteligente)
-path_produto, erro_busca = encontrar_imagem_na_marra(produto_atual['id'])
-img_produto_b64 = get_img_as_base64(path_produto)
-
 preco_atual = produto_atual["preco"]
-preco_antigo = preco_atual + 100.00
+preco_antigo = preco_atual + (100 if preco_atual > 0 else 0)
 
-# --- 6. CSS (LAYOUT) ---
+# --- 5. CSS (ESTILO FINAL) ---
 bg_visor_css = f"url('data:image/png;base64,{visor_b64}')" if visor_b64 else "#111"
 
 st.markdown(f"""
@@ -97,7 +134,7 @@ st.markdown(f"""
         letter-spacing: 5px; margin-bottom: 40px;
     }}
     
-    /* PAINEIS LATERAIS ALINHADOS VERTICALMENTE */
+    /* ALINHAMENTO VERTICAL */
     [data-testid="column"] {{ display: flex; flex-direction: column; justify-content: center; }}
 
     /* ESQUERDA */
@@ -110,21 +147,38 @@ st.markdown(f"""
         background-image: {bg_visor_css}; background-size: cover; background-position: center;
         border-radius: 4px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); margin-bottom: 20px;
     }}
+    
+    /* --- O EFEITO MÁGICO --- */
     .perfume-overlay {{
-        position: absolute; top: 50%; left: 50%; transform: translate(-50%, -45%);
-        height: 60%; width: auto; filter: drop-shadow(0 15px 20px rgba(0,0,0,0.8));
+        position: absolute; 
+        top: 57%; /* Ajuste fino da altura */
+        left: 50%; 
+        transform: translate(-50%, -50%);
+        height: 55%; 
+        width: auto; 
+        
+        /* Remove o fundo branco do JPG visualmente */
+        mix-blend-mode: multiply; 
+        filter: contrast(1.1) brightness(0.95);
+        
         transition: all 0.5s;
     }}
-    .perfume-overlay:hover {{ transform: translate(-50%, -48%) scale(1.03); }}
+    
+    .perfume-overlay:hover {{ 
+        transform: translate(-50%, -52%) scale(1.05); 
+        mix-blend-mode: normal; /* Volta ao normal no hover */
+        filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5));
+    }}
 
-    /* BOTÕES E INFO */
+    /* BOTOES E INFO */
     div.stButton > button {{
         background: transparent; border: 1px solid #d4af37; color: #d4af37;
         font-family: 'Cinzel', serif; width: 100%; padding: 0.8rem; letter-spacing: 2px; text-transform: uppercase;
     }}
     div.stButton > button:hover {{ background: rgba(212, 175, 55, 0.15); color: #fff; border-color: #fff; }}
+    
     .prod-name {{ font-family: 'Cinzel', serif; font-size: 2.5rem; color: #fff; text-align: center; }}
-    .prod-desc {{ font-family: 'Playfair Display', serif; color: #888; text-align: center; font-style: italic; }}
+    .prod-desc {{ font-family: 'Playfair Display', serif; color: #888; text-align: center; font-style: italic; margin-bottom:15px; }}
     .price-box {{ text-align: center; margin-top: 10px; }}
     .old {{ text-decoration: line-through; color: #555; font-size: 1.2rem; margin-right: 10px; }}
     .new {{ color: #d4af37; font-size: 3rem; font-weight: bold; }}
@@ -143,7 +197,7 @@ st.markdown(f"""
 </style>
 """, unsafe_allow_html=True)
 
-# --- 7. ESTRUTURA ---
+# --- 6. LAYOUT ---
 st.markdown('<div class="brand-header"><h1 class="brand-title">AURUM SCENTS</h1></div>', unsafe_allow_html=True)
 col_L, col_C, col_R = st.columns([3, 6, 3], gap="large")
 
@@ -153,48 +207,15 @@ with col_L:
     <div class="left-panel">
         <h3 style="color:#d4af37; font-family:'Cinzel'; margin-bottom:20px;">A Essência do Luxo</h3>
         <p class="panel-text">Na Aurum Scents, a fragrância não é apenas um aroma, é uma assinatura invisível.</p>
-        <p class="panel-text">Nossa curadoria busca ingredientes raros para despertar os prazeres da fragrância em sua forma mais pura.</p>
+        <p class="panel-text">Nossa curadoria busca ingredientes raros para despertar os prazeres da fragrância em sua forma mais pura. Cada frasco é uma promessa de distinção.</p>
     </div>
     """, unsafe_allow_html=True)
 
 # CENTRO
 with col_C:
-    # SE NÃO ACHOU IMAGEM, MOSTRA MENSAGEM DE DEBUG NO LUGAR DA IMAGEM
-    if not img_produto_b64:
-        st.warning(f"⚠️ {erro_busca}")
-        # Fallback transparente
-        src = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
-    else:
-        src = f"data:image/png;base64,{img_produto_b64}"
+    # Se não achar imagem, usa GIF transparente
+    src = f"data:image/jpeg;base64,{img_produto_b64}" if img_produto_b64 else "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
         
     st.markdown(f"""
     <div class="visor-wrapper">
         <img src="{src}" class="perfume-overlay">
-    </div>
-    """, unsafe_allow_html=True)
-
-    c1, c2, c3 = st.columns([1, 0.2, 1])
-    with c1: st.button("❮ ANTERIOR", on_click=anterior)
-    with c3: st.button("PRÓXIMO ❯", on_click=proximo)
-
-    st.markdown(f"""
-        <div class="prod-name">{produto_atual['nome']}</div>
-        <div class="prod-desc">{produto_atual['desc']}</div>
-        <div class="price-box">
-            <span class="old">De R$ {preco_antigo:.2f}</span>
-            <span class="new">R$ {preco_atual:.2f}</span>
-        </div>
-    """, unsafe_allow_html=True)
-
-# DIREITA
-with col_R:
-    msg = f"Olá Jerry! Interesse no {produto_atual['nome']}"
-    link = f"https://wa.me/5531992051499?text={msg.replace(' ', '%20')}"
-    st.markdown(f"""
-    <div class="right-panel">
-        <div style="color:#d4af37; font-family:'Cinzel'; font-size:1.5rem;">JERRY BOMBETA</div>
-        <div style="color:#888; font-size:0.9rem;">Specialist Fragrance Consultant</div>
-        <a href="{link}" target="_blank" class="wa-btn">FALAR NO WHATSAPP</a>
-        <div style="margin-top:15px; color:#d4af37;">(31) 99205-1499</div>
-    </div>
-    """, unsafe_allow_html=True)
