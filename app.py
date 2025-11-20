@@ -81,7 +81,7 @@ visor_b64 = get_img_as_base64(path_visor)
 preco_atual = produto_atual["preco"]
 preco_antigo = preco_atual + (100 if preco_atual > 0 else 0)
 
-# --- 5. CSS DEFINITIVO (COM MÁSCARA DE RECORTE) ---
+# --- 5. CSS DEFINITIVO (COM AJUSTE FINO DA MÁSCARA) ---
 bg_visor_css = f"url('data:image/png;base64,{visor_b64}')" if visor_b64 else "#222"
 
 st.markdown(f"""
@@ -102,37 +102,37 @@ st.markdown(f"""
         text-shadow: 0 4px 10px rgba(0,0,0,0.8);
     }}
 
-    /* LAYOUT DE 3 COLUNAS ALINHADO */
+    /* LAYOUT */
     [data-testid="column"] {{ display: flex; flex-direction: column; justify-content: center; }}
 
     /* ESQUERDA */
     .left-panel {{ padding-right: 30px; border-right: 1px solid #222; text-align: justify; height: 100%; display: flex; flex-direction: column; justify-content: center; }}
     .panel-text {{ font-size: 1.1rem; color: #aaa; line-height: 1.8; margin-bottom: 20px; }}
 
-    /* --- VISOR CENTRAL COM MÁSCARA (SOLUÇÃO DO VAZAMENTO) --- */
+    /* --- VISOR CENTRAL --- */
     .visor-wrapper {{
-        position: relative; width: 100%; max-width: 850px; /* Tamanho Grande */
+        position: relative; width: 100%; max-width: 850px;
         aspect-ratio: 16/9; margin: 0 auto 25px auto;
         background-image: {bg_visor_css}; background-size: cover; background-position: center;
         border-radius: 4px; box-shadow: 0 25px 50px rgba(0,0,0,0.9);
     }}
     
-    /* ESTA É A MÁSCARA: Uma caixa invisível que corta o que sair dela */
+    /* MÁSCARA AJUSTADA: Reduzi a altura para não cobrir a plaquinha */
     .visor-mask {{
         position: absolute;
-        /* Coordenadas exatas da área iluminada do seu Visor.jpg */
-        top: 8%; left: 18.3%; width: 63.4%; height: 77.5%;
-        overflow: hidden; /* O SEGREDO: Corta o excesso */
-        display: flex; align-items: flex-end; justify-content: center; /* Alinha perfume na base */
+        top: 8%; left: 18.3%; width: 63.4%; 
+        height: 66%; /* <--- AJUSTE AQUI: Altura reduzida para parar antes da placa */
+        overflow: hidden;
+        display: flex; align-items: flex-end; justify-content: center;
     }}
 
     .perfume-img {{
-        /* O perfume agora fica dentro da máscara, não precisa de posição absoluta */
-        height: 88%; width: auto; /* Altura relativa à área iluminada */
-        mix-blend-mode: multiply; /* Truque para JPG */
+        /* O perfume ocupa 85% da nova área da máscara */
+        height: 85%; width: auto;
+        mix-blend-mode: multiply;
         filter: contrast(1.1) brightness(0.95);
         transition: transform 0.5s ease;
-        margin-bottom: 1%; /* Pequeno ajuste da base */
+        margin-bottom: 1%; 
     }}
     .perfume-img:hover {{ transform: scale(1.05); mix-blend-mode: normal; }}
 
@@ -153,7 +153,7 @@ st.markdown(f"""
     .right-panel {{
         background: linear-gradient(145deg, #111, #0a0a0a); padding: 40px; 
         border-radius: 10px; text-align: center; border: 1px solid #222;
-        height: fit-content; /* Ajusta altura ao conteúdo */
+        height: fit-content;
         box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }}
     .wa-btn {{
@@ -163,7 +163,7 @@ st.markdown(f"""
     }}
     .wa-btn:hover {{ transform: scale(1.05); color: white; box-shadow: 0 5px 15px rgba(37, 211, 102, 0.4); }}
 
-    /* RODAPÉ FINAL */
+    /* RODAPÉ */
     .final-footer {{
         text-align: center; margin-top: 80px; padding-top: 30px;
         border-top: 1px solid #222; color: #666; font-family: 'Playfair Display', serif; font-style: italic;
@@ -171,7 +171,7 @@ st.markdown(f"""
 </style>
 """, unsafe_allow_html=True)
 
-# --- 6. ESTRUTURA DO LAYOUT (3 COLUNAS) ---
+# --- 6. ESTRUTURA DO LAYOUT ---
 st.markdown('<div class="brand-title">AURUM SCENTS</div>', unsafe_allow_html=True)
 
 col_L, col_C, col_R = st.columns([3, 6, 3], gap="large")
@@ -187,12 +187,10 @@ with col_L:
     </div>
     """, unsafe_allow_html=True)
 
-# CENTRO (VISOR + INFO)
+# CENTRO
 with col_C:
-    # Imagem do Perfume (ou GIF transparente)
     src = f"data:image/png;base64,{img_produto_b64}" if img_produto_b64 else "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
     
-    # Visor com a MÁSCARA DE RECORTE aplicada
     st.markdown(f"""
     <div class="visor-wrapper">
         <div class="visor-mask">
@@ -201,12 +199,10 @@ with col_C:
     </div>
     """, unsafe_allow_html=True)
 
-    # Botões (Alinhados e com tamanho corrigido)
     c1, c2, c3 = st.columns([1.2, 0.1, 1.2]) 
     with c1: st.button("❮ ANTERIOR", on_click=anterior, use_container_width=True)
     with c3: st.button("PRÓXIMO ❯", on_click=proximo, use_container_width=True)
 
-    # Info do Produto
     st.markdown(f"""
         <div class="info-container" style="margin-top: 25px;">
             <div class="prod-name">{produto_atual['nome']}</div>
@@ -218,7 +214,7 @@ with col_C:
         </div>
     """, unsafe_allow_html=True)
 
-# DIREITA (CONTATO)
+# DIREITA
 with col_R:
     msg = f"Olá Jerry! Tenho interesse no exclusivo {produto_atual['nome']}."
     link = f"https://wa.me/5531992051499?text={msg.replace(' ', '%20')}"
@@ -232,7 +228,7 @@ with col_R:
     </div>
     """, unsafe_allow_html=True)
 
-# --- 7. MENSAGEM FINAL (RODAPÉ) ---
+# --- 7. RODAPÉ ---
 st.markdown("""
 <div class="final-footer">
     "O perfume é a forma mais intensa da memória. Ele é o acessório invisível e definitivo da moda, que anuncia sua chegada e prolonga sua partida."
