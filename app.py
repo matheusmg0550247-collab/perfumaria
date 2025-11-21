@@ -36,6 +36,7 @@ def carregar_produtos_automaticamente():
     produtos_encontrados = []
     pasta_atual = os.path.dirname(os.path.abspath(__file__))
     pasta_imagens = os.path.join(pasta_atual, "imagens")
+    # Tenta achar a pasta imagens ou images
     if not os.path.exists(pasta_imagens):
         pasta_imagens = os.path.join(pasta_atual, "images")
         if not os.path.exists(pasta_imagens): return []
@@ -64,7 +65,7 @@ def get_img_as_base64(caminho):
         return base64.b64encode(data).decode('utf-8')
     except: return None
 
-# --- 4. INICIALIZAÇÃO ---
+# --- 4. INICIALIZAÇÃO E CARREGAMENTO DE ASSETS ---
 produtos = carregar_produtos_automaticamente()
 if not produtos: st.stop()
 
@@ -74,14 +75,27 @@ def anterior(): st.session_state.idx = (st.session_state.idx - 1 + len(produtos)
 
 produto_atual = produtos[st.session_state.idx]
 img_produto_b64 = get_img_as_base64(produto_atual["arquivo"])
+
+# Define a pasta base para buscar Visor e Logo
 path_base = os.path.dirname(produtos[0]["arquivo"])
+
+# Carrega Visor
 path_visor = os.path.join(path_base, "Visor.jpg")
 if not os.path.exists(path_visor): path_visor = os.path.join(path_base, "Visor.png")
 visor_b64 = get_img_as_base64(path_visor)
+
+# NOVO: Carrega Logo
+path_logo = os.path.join(path_base, "Logo.jpg")
+# Tenta png se jpg não existir, por garantia
+if not os.path.exists(path_logo): path_logo = os.path.join(path_base, "Logo.png")
+logo_b64 = get_img_as_base64(path_logo)
+logo_src = f"data:image/jpeg;base64,{logo_b64}" if logo_b64 else ""
+
+
 preco_atual = produto_atual["preco"]
 preco_antigo = preco_atual + (100 if preco_atual > 0 else 0)
 
-# --- 5. CSS DEFINITIVO (AJUSTES DE CENTRALIZAÇÃO E ZOOM 75%) ---
+# --- 5. CSS DEFINITIVO ---
 bg_visor_css = f"url('data:image/png;base64,{visor_b64}')" if visor_b64 else "#222"
 
 st.markdown(f"""
@@ -104,6 +118,14 @@ st.markdown(f"""
 
     /* LAYOUT */
     [data-testid="column"] {{ display: flex; flex-direction: column; justify-content: center; }}
+
+    /* ESTILO DAS LOGOS LATERAIS */
+    .side-logo-container {{ text-align: center; margin-bottom: 25px; }}
+    .side-logo {{
+        max-width: 140px; /* Tamanho da logo */
+        height: auto;
+        filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.4)); /* Brilho dourado */
+    }}
 
     /* ESQUERDA */
     .left-panel {{ padding-right: 30px; border-right: 1px solid #222; text-align: justify; height: 100%; display: flex; flex-direction: column; justify-content: center; }}
@@ -133,12 +155,11 @@ st.markdown(f"""
         filter: contrast(1.1) brightness(0.95);
         transition: transform 0.5s ease;
         margin-bottom: 4%;
-        /* AJUSTE 1: Aumentado para 3.5% para empurrar mais para a direita */
-        margin-left: 3.5%;
+        /* AJUSTE FINAL: Margem negativa para forçar a esquerda */
+        margin-left: -2%;
     }}
     .perfume-img:hover {{
-        /* AJUSTE 2: Zoom aumentado para 75% (scale 1.75) */
-        transform: scale(1.75);
+        transform: scale(1.75); /* Zoom 75% */
         mix-blend-mode: normal;
     }}
 
@@ -184,6 +205,10 @@ col_L, col_C, col_R = st.columns([3, 6, 3], gap="large")
 
 # ESQUERDA
 with col_L:
+    # LOGO ESQUERDA
+    if logo_src:
+        st.markdown(f"""<div class="side-logo-container"><img src="{logo_src}" class="side-logo"></div>""", unsafe_allow_html=True)
+        
     st.markdown("""
     <div class="left-panel">
         <h3 style="color:#d4af37; margin-bottom:25px;">A Essência do Luxo</h3>
@@ -222,6 +247,10 @@ with col_C:
 
 # DIREITA
 with col_R:
+    # LOGO DIREITA
+    if logo_src:
+        st.markdown(f"""<div class="side-logo-container"><img src="{logo_src}" class="side-logo"></div>""", unsafe_allow_html=True)
+
     msg = f"Olá Jerry! Tenho interesse no exclusivo {produto_atual['nome']}."
     link = f"https://wa.me/5531992051499?text={msg.replace(' ', '%20')}"
     st.markdown(f"""
