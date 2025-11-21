@@ -25,8 +25,8 @@ def get_current_time():
 
 # --- 3. CATÁLOGO ---
 CATALOGO = {
-    1: {"nome": "Royal Elixir Gold", "preco": 299.90, "desc": "Notas de ouro, mel e especiarias raras."},
-    2: {"nome": "Black Orchid Intense", "preco": 350.00, "desc": "Orquídea negra profunda e misteriosa."},
+    1: {"nome": "Angel Per F (100 ml)", "preco": 960.00, "desc": "fragrância revolucionária e ousada, que combina notas doces, frutadas e sensuais com um fundo quente e envolvente."},
+    2: {"nome": "Latafa Assad Bourbon (100 ml)", "preco": 470.00, "desc": "Orquídea negra profunda e misteriosa."},#* Latafa Assad Bourbon (100 ml) – R$ 470,00
     3: {"nome": "Velvet Santal Wood", "preco": 420.00, "desc": "Sândalo aveludado com toque de couro."},
     4: {"nome": "Imperial Amber", "preco": 380.00, "desc": "Âmbar imperial com raspas cítricas."},
     5: {"nome": "Club de Nuit Intense", "preco": 250.00, "desc": "Cítrico amadeirado marcante e viril."},
@@ -280,7 +280,7 @@ with col_R:
     st.markdown(f"""
     <div class="right-panel" style="margin-top: 30px;">
         <div style="color:#fff; margin-bottom:10px; letter-spacing:2px;">ATENDIMENTO EXCLUSIVO</div>
-        <div class="contact-name" style="font-size:2rem; color:#d4af37; margin-bottom:5px;">JERRY BOMBETA</div>
+        <div class="contact-name" style="font-size:2rem; color:#d4af37; margin-bottom:5px;">JERRY</div>
         <div style="color:#888; font-size:0.9rem; font-style:italic;">Specialist Fragrance Consultant</div>
         <a href="{link}" target="_blank" class="wa-btn">FALAR NO WHATSAPP</a>
         <div style="margin-top:20px; color:#d4af37; font-weight:bold; letter-spacing:1px;">📞 (31) 99205-1499</div>
