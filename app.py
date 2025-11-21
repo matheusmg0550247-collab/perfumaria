@@ -88,7 +88,7 @@ logo_src = f"data:image/jpeg;base64,{logo_b64}" if logo_b64 else ""
 preco_atual = produto_atual["preco"]
 preco_antigo = preco_atual + (100 if preco_atual > 0 else 0)
 
-# --- 5. CSS DEFINITIVO (PREENCHIMENTO TOTAL) ---
+# --- 5. CSS DEFINITIVO ---
 bg_visor_css = f"url('data:image/png;base64,{visor_b64}')" if visor_b64 else "#222"
 
 st.markdown(f"""
@@ -142,17 +142,19 @@ st.markdown(f"""
     }}
 
     .perfume-img {{
-        /* AJUSTE 1: Aumentado para 92% para preencher quase toda a luz */
-        height: 92%; 
+        /* VOLTANDO AO TAMANHO ORIGINAL */
+        height: 78%; 
         width: auto;
         mix-blend-mode: multiply;
         filter: contrast(1.1) brightness(0.95);
         transition: transform 0.5s ease;
-        /* Margem zerada para ele assentar na base */
-        margin-bottom: 0%;
+        margin-bottom: 4%;
+        
+        /* AQUI ESTÁ A FORÇADA PARA A DIREITA */
+        margin-left: 6%; 
     }}
     .perfume-img:hover {{
-        transform: scale(1.35); /* Zoom potente */
+        transform: scale(1.75); /* Zoom 75% */
         mix-blend-mode: normal;
     }}
 
@@ -191,10 +193,9 @@ st.markdown(f"""
 </style>
 """, unsafe_allow_html=True)
 
-# --- 6. ESTRUTURA DO LAYOUT (AJUSTE DE GAP E PROPORÇÃO) ---
+# --- 6. ESTRUTURA DO LAYOUT ---
 st.markdown('<div class="brand-title">AURUM SCENTS</div>', unsafe_allow_html=True)
 
-# AJUSTE 2: GAP="SMALL" aproxima as colunas laterais do centro
 col_L, col_C, col_R = st.columns([3, 6, 3], gap="small")
 
 # ESQUERDA
