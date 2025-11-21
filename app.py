@@ -76,7 +76,6 @@ def anterior(): st.session_state.idx = (st.session_state.idx - 1 + len(produtos)
 produto_atual = produtos[st.session_state.idx]
 img_produto_b64 = get_img_as_base64(produto_atual["arquivo"])
 
-# Define a pasta base para buscar Visor e Logo
 path_base = os.path.dirname(produtos[0]["arquivo"])
 
 # Carrega Visor
@@ -84,9 +83,8 @@ path_visor = os.path.join(path_base, "Visor.jpg")
 if not os.path.exists(path_visor): path_visor = os.path.join(path_base, "Visor.png")
 visor_b64 = get_img_as_base64(path_visor)
 
-# NOVO: Carrega Logo
+# Carrega Logo
 path_logo = os.path.join(path_base, "Logo.jpg")
-# Tenta png se jpg não existir, por garantia
 if not os.path.exists(path_logo): path_logo = os.path.join(path_base, "Logo.png")
 logo_b64 = get_img_as_base64(path_logo)
 logo_src = f"data:image/jpeg;base64,{logo_b64}" if logo_b64 else ""
@@ -122,9 +120,9 @@ st.markdown(f"""
     /* ESTILO DAS LOGOS LATERAIS */
     .side-logo-container {{ text-align: center; margin-bottom: 25px; }}
     .side-logo {{
-        max-width: 140px; /* Tamanho da logo */
+        max-width: 140px;
         height: auto;
-        filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.4)); /* Brilho dourado */
+        filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.4));
     }}
 
     /* ESQUERDA */
@@ -145,18 +143,20 @@ st.markdown(f"""
         top: 8%; left: 18.3%; width: 63.4%; 
         height: 66%; 
         overflow: hidden;
+        /* O justify-content: center AQUI garante a centralização horizontal */
         display: flex; align-items: flex-end; justify-content: center;
     }}
 
     .perfume-img {{
-        height: 78%; 
+        /* AJUSTE 1: Aumentei para 80% para preencher melhor o espaço */
+        height: 80%; 
         width: auto;
         mix-blend-mode: multiply;
         filter: contrast(1.1) brightness(0.95);
         transition: transform 0.5s ease;
-        margin-bottom: 4%;
-        /* AJUSTE FINAL: Margem negativa para forçar a esquerda */
-        margin-left: -2%;
+        margin-bottom: 3.5%;
+        /* AJUSTE 2: Removida a margem negativa que empurrava para a esquerda */
+        margin-left: 0; 
     }}
     .perfume-img:hover {{
         transform: scale(1.75); /* Zoom 75% */
@@ -205,7 +205,6 @@ col_L, col_C, col_R = st.columns([3, 6, 3], gap="large")
 
 # ESQUERDA
 with col_L:
-    # LOGO ESQUERDA
     if logo_src:
         st.markdown(f"""<div class="side-logo-container"><img src="{logo_src}" class="side-logo"></div>""", unsafe_allow_html=True)
         
@@ -247,7 +246,6 @@ with col_C:
 
 # DIREITA
 with col_R:
-    # LOGO DIREITA
     if logo_src:
         st.markdown(f"""<div class="side-logo-container"><img src="{logo_src}" class="side-logo"></div>""", unsafe_allow_html=True)
 
