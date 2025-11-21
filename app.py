@@ -4,7 +4,6 @@ import os
 import re
 from datetime import datetime
 import pytz
-import requests
 
 # --- 1. CONFIGURAÇÃO DA PÁGINA ---
 st.set_page_config(
@@ -14,7 +13,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# --- 2. FUNÇÕES AUXILIARES (DATA E LOCALIZAÇÃO) ---
+# --- 2. FUNÇÕES AUXILIARES (DATA) ---
 def get_current_time():
     try:
         # Tenta pegar horário de SP/Brasil
@@ -23,18 +22,6 @@ def get_current_time():
         return now.strftime("%d.%m.%Y"), now.strftime("%H:%M")
     except:
         return datetime.now().strftime("%d.%m.%Y"), datetime.now().strftime("%H:%M")
-
-def get_location():
-    try:
-        # Serviço gratuito de geolocalização por IP
-        response = requests.get('http://ip-api.com/json/')
-        data = response.json()
-        if data['status'] == 'success':
-            return f"{data['city']}, {data['regionName']}"
-        else:
-            return "Belo Horizonte, Minas Gerais"
-    except:
-        return "Belo Horizonte, Minas Gerais"
 
 # --- 3. CATÁLOGO ---
 CATALOGO = {
@@ -115,7 +102,6 @@ preco_antigo = preco_atual + (100 if preco_atual > 0 else 0)
 
 # Dados Dinâmicos
 data_hoje, hora_agora = get_current_time()
-localizacao_usuario = get_location()
 
 # --- 6. CSS DEFINITIVO ---
 bg_visor_css = f"url('data:image/png;base64,{visor_b64}')" if visor_b64 else "#222"
@@ -144,19 +130,20 @@ st.markdown(f"""
     /* LOGOS LATERAIS */
     .side-logo-container {{ text-align: center; margin-bottom: 30px; }}
     .side-logo {{
-        max-width: 140px;
+        max-width: 130px;
         height: auto;
         filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.3));
     }}
 
-    /* WIDGETS LATERAIS (Data/Local) */
+    /* WIDGETS LATERAIS (Data/Apoio) */
     .widget-box {{
         margin-top: 20px; padding: 20px;
         border-top: 1px solid #333; border-bottom: 1px solid #333;
         text-align: center; color: #888; font-size: 0.9rem;
     }}
-    .widget-title {{ color: #d4af37; font-family: 'Cinzel', serif; margin-bottom: 5px; font-size: 1rem; }}
-    .widget-data {{ color: #fff; font-size: 1.1rem; letter-spacing: 1px; }}
+    .widget-title {{ color: #d4af37; font-family: 'Cinzel', serif; margin-bottom: 5px; font-size: 0.9rem; }}
+    .widget-data {{ color: #fff; font-size: 1.1rem; letter-spacing: 1px; transition: 0.3s; }}
+    .widget-data:hover {{ color: #d4af37; transform: scale(1.05); }}
 
     /* ESQUERDA */
     .left-panel {{ padding-right: 15px; border-right: 1px solid #333; text-align: justify; height: 100%; display: flex; flex-direction: column; justify-content: center; }}
@@ -180,8 +167,8 @@ st.markdown(f"""
         mix-blend-mode: multiply; filter: contrast(1.1) brightness(0.95);
         transition: transform 0.5s ease; margin-bottom: 4%;
         
-        /* AJUSTE FINAL DE POSIÇÃO: Aumentei para 8.5% */
-        margin-left: 8.5%; 
+        /* AJUSTE DE POSIÇÃO: 7% */
+        margin-left: 7%; 
     }}
     .perfume-img:hover {{ transform: scale(1.75); mix-blend-mode: normal; }}
 
@@ -229,11 +216,13 @@ with col_L:
     if logo_src:
         st.markdown(f"""<div class="side-logo-container"><img src="{logo_src}" class="side-logo"></div>""", unsafe_allow_html=True)
     
-    # Widget de Localização
+    # Widget de Apoio Digital (Substituindo Localização)
     st.markdown(f"""
     <div class="widget-box">
-        <div class="widget-title">SUA LOCALIZAÇÃO</div>
-        <div class="widget-data">📍 {localizacao_usuario}</div>
+        <div class="widget-title">APOIO DIGITAL</div>
+        <a href="https://www.instagram.com/helpdigitalti__bh/?igsh=MXc0dXJuZWFscTN6bA%3D%3D#" target="_blank" style="text-decoration:none;">
+            <div class="widget-data" style="color: #d4af37; font-weight: bold;">Help Digital 🚀</div>
+        </a>
     </div>
     """, unsafe_allow_html=True)
         
