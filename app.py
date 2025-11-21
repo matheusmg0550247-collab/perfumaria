@@ -30,7 +30,7 @@ CATALOGO = {
     3: {"nome": "Lattafa khamrah (100 ml)", "preco": 380.00, "desc": "Gourmand árabe bem cremoso, doce, quente e envolvente – lembra sobremesa sofisticada com especiarias e frutas secas.."},
     4: {"nome": "Fakhar Black (100 ml)", "preco": 380.00, "desc": "perfume âmbar aromático amadeirado, com cara de “cheiro de homem arrumado” 😄 – moderno, levemente adocicado, mas bem fresco e versátil."},
     5: {"nome": "L’Homme Lacoste (100 ml)", "preco": 380.00, "desc": "perfume amadeirado especiado fresco, com cara de homem arrumado, moderno e elegante – bem na linha “camisa social, tênis branco e relógio bonito” 😄."},
-    6: {"nome": "Mercedes-Benz Black (100 ml), "preco": 380.00, "desc": "Um perfume bem queridinho por quem gosta de baunilha cremosa com toque de incenso."},
+    6: {"nome": "Mercedes-Benz Black (100 ml)", "preco": 380.00, "desc": "Um perfume bem queridinho por quem gosta de baunilha cremosa com toque de incenso."},
     7: {"nome": "Silver Scent (100 ml)", "preco": 275.00, "desc": "Perfume oriental amadeirado bem marcante, com cara de perfume de balada/noite, daqueles que projetam e deixam rastro."},
     8: {"nome": "Scandal (80 ml)", "preco": 810.00, "desc": "Perfume chypre gourmand bem doce, melado e sensual, com cara de noite, festa e “mulher que quer chamar atenção. 😄"},
     9: {"nome": "Phantom Rabanne (100 ml)", "preco": 380.00, "desc": "Amadeirado aromático moderno, com cara de perfume de festa, balada e rolê noturno, mas que também dá pra usar no dia a dia se você curte algo mais chamativo."},
