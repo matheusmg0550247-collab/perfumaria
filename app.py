@@ -25,22 +25,22 @@ def get_current_time():
 
 # --- 3. CATÁLOGO ---
 CATALOGO = {
-    1: {"nome": "Angel Per F (100 ml)", "preco": 960.00, "desc": "fragrância revolucionária e ousada, que combina notas doces, frutadas e sensuais com um fundo quente e envolvente."},
-    2: {"nome": "Latafa Assad Bourbon (100 ml)", "preco": 470.00, "desc": "Orquídea negra profunda e misteriosa."},#* Latafa Assad Bourbon (100 ml) – R$ 470,00
-    3: {"nome": "Velvet Santal Wood", "preco": 420.00, "desc": "Sândalo aveludado com toque de couro."},
-    4: {"nome": "Imperial Amber", "preco": 380.00, "desc": "Âmbar imperial com raspas cítricas."},
-    5: {"nome": "Club de Nuit Intense", "preco": 250.00, "desc": "Cítrico amadeirado marcante e viril."},
-    6: {"nome": "Midnight Saffron", "preco": 310.00, "desc": "Açafrão noturno com fundo de tabaco."},
-    7: {"nome": "Oceanic Leather", "preco": 275.00, "desc": "Couro italiano com brisa marinha."},
-    8: {"nome": "Rose of Dubai", "preco": 340.00, "desc": "Rosas damascenas colhidas ao amanhecer."},
-    9: {"nome": "Emerald Vetiver", "preco": 290.00, "desc": "Vetiver fresco com notas verdes vibrantes."},
-    10: {"nome": "Golden Tobacco", "preco": 450.00, "desc": "Folhas de tabaco cubano e baunilha."},
-    11: {"nome": "Pure Musk Absolute", "preco": 220.00, "desc": "Almíscar puro, limpo e sofisticado."},
-    12: {"nome": "Celestial Oud", "preco": 550.00, "desc": "Oud raro envelhecido em barris de carvalho."},
-    13: {"nome": "Spice Route", "preco": 260.00, "desc": "Pimenta rosa, cardamomo e noz-moscada."},
-    14: {"nome": "Vanilla Noir", "preco": 280.00, "desc": "Baunilha negra de Madagascar defumada."},
-    15: {"nome": "Cedar & Cognac", "preco": 330.00, "desc": "Cedro nobre banhado em conhaque envelhecido."},
-    16: {"nome": "Majestic Iris", "preco": 360.00, "desc": "Íris atalcada com fundo amadeirado suave."},
+    1: {"nome": "Angel Per F (100 ml)", "preco": 960.00, "desc": "Fragrância revolucionária e ousada, que combina notas doces, frutadas e sensuais com um fundo quente e envolvente."},
+    2: {"nome": "Latafa Assad Bourbon (100 ml)", "preco": 470.00, "desc": "Oriental especiado quente, cremoso e bem envolvente — aquela vibe de noite fria, roupa escura e clima mais elegante."},
+    3: {"nome": "Lattafa khamrah (100 ml)", "preco": 380.00, "desc": "Gourmand árabe bem cremoso, doce, quente e envolvente – lembra sobremesa sofisticada com especiarias e frutas secas.."},
+    4: {"nome": "Fakhar Black (100 ml)", "preco": 380.00, "desc": "perfume âmbar aromático amadeirado, com cara de “cheiro de homem arrumado” 😄 – moderno, levemente adocicado, mas bem fresco e versátil."},
+    5: {"nome": "L’Homme Lacoste (100 ml)", "preco": 380.00, "desc": "perfume amadeirado especiado fresco, com cara de homem arrumado, moderno e elegante – bem na linha “camisa social, tênis branco e relógio bonito” 😄."},
+    6: {"nome": "Mercedes-Benz Black (100 ml), "preco": 380.00, "desc": "Um perfume bem queridinho por quem gosta de baunilha cremosa com toque de incenso."},
+    7: {"nome": "Silver Scent (100 ml)", "preco": 275.00, "desc": "Perfume oriental amadeirado bem marcante, com cara de perfume de balada/noite, daqueles que projetam e deixam rastro."},
+    8: {"nome": "Scandal (80 ml)", "preco": 810.00, "desc": "Perfume chypre gourmand bem doce, melado e sensual, com cara de noite, festa e “mulher que quer chamar atenção. 😄"},
+    9: {"nome": "Phantom Rabanne (100 ml)", "preco": 380.00, "desc": "Amadeirado aromático moderno, com cara de perfume de festa, balada e rolê noturno, mas que também dá pra usar no dia a dia se você curte algo mais chamativo."},
+    10: {"nome": "Latafa Yara (10 ml)", "preco": 380.00, "desc": "um floral gourmand cremoso e atalcado, bem feminino, doce e confortável – tem cara de “cheiro de princesa”, aquele doce limpinho e aconchegant."},
+    11: {"nome": "Phantom Paco Rabanne (100 ml)", "preco": 380.00, "desc": "amadeirado aromático moderno, com cheiro de lavanda cremosa com limão e baunilha – bem vibe balada/rolê, jovem e chamativo."},
+    12: {"nome": "Club de Nuit Intense Man (100 ml)", "preco": 380.00, "desc": "amadeirado especiado com toques frutados cítricos, famoso por lembrar o estilo do Creed Aventus: cheiro de limão + abacaxi esfumaçado + madeiras + baunilh."},
+    13: {"nome": "Animale Sexy (100 ml)", "preco": 380.00, "desc": "Floral frutado gourmand bem doce, cremoso e sensual, pensado pra aquela vibe mulher poderosa / femme fatale."},
+    14: {"nome": "Calvin Klein Eternity (100 ml)", "preco": 430.00, "desc": "Um aromático fougère fresco e limpo, com aquela cara clássica de “cheiro de homem elegante, arrumado e discreto."}, 
+    15: {"nome": "Miss Dior (100 ml)", "preco": 1040.00, "desc": "Um perfume floral âmbar romântico, elegante e bem feminino, com aquele ar de “bouquet de flores caro” e fundo cremosinho."},
+    16: {"nome": Olympea Rabanne (100 ml)", "preco": 380.00, "desc": "Um oriental floral com baunilha salgada, bem sensual, marcante e com cara de “deusa moderna” mesmo."},
 }
 
 # --- 4. CARREGAMENTO DE ARQUIVOS ---
