@@ -2,6 +2,9 @@ import streamlit as st
 import base64
 import os
 import re
+from datetime import datetime
+import pytz
+import requests
 
 # --- 1. CONFIGURAÇÃO DA PÁGINA ---
 st.set_page_config(
@@ -11,7 +14,29 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# --- 2. CATÁLOGO ---
+# --- 2. FUNÇÕES AUXILIARES (DATA E LOCALIZAÇÃO) ---
+def get_current_time():
+    try:
+        # Tenta pegar horário de SP/Brasil
+        tz = pytz.timezone('America/Sao_Paulo')
+        now = datetime.now(tz)
+        return now.strftime("%d.%m.%Y"), now.strftime("%H:%M")
+    except:
+        return datetime.now().strftime("%d.%m.%Y"), datetime.now().strftime("%H:%M")
+
+def get_location():
+    try:
+        # Serviço gratuito de geolocalização por IP
+        response = requests.get('http://ip-api.com/json/')
+        data = response.json()
+        if data['status'] == 'success':
+            return f"{data['city']}, {data['regionName']}"
+        else:
+            return "Belo Horizonte, Minas Gerais"
+    except:
+        return "Belo Horizonte, Minas Gerais"
+
+# --- 3. CATÁLOGO ---
 CATALOGO = {
     1: {"nome": "Royal Elixir Gold", "preco": 299.90, "desc": "Notas de ouro, mel e especiarias raras."},
     2: {"nome": "Black Orchid Intense", "preco": 350.00, "desc": "Orquídea negra profunda e misteriosa."},
@@ -31,7 +56,7 @@ CATALOGO = {
     16: {"nome": "Majestic Iris", "preco": 360.00, "desc": "Íris atalcada com fundo amadeirado suave."},
 }
 
-# --- 3. FUNÇÕES DE CARREGAMENTO ---
+# --- 4. CARREGAMENTO DE ARQUIVOS ---
 def carregar_produtos_automaticamente():
     produtos_encontrados = []
     pasta_atual = os.path.dirname(os.path.abspath(__file__))
@@ -64,7 +89,7 @@ def get_img_as_base64(caminho):
         return base64.b64encode(data).decode('utf-8')
     except: return None
 
-# --- 4. INICIALIZAÇÃO ---
+# --- 5. INICIALIZAÇÃO ---
 produtos = carregar_produtos_automaticamente()
 if not produtos: st.stop()
 
@@ -88,7 +113,11 @@ logo_src = f"data:image/jpeg;base64,{logo_b64}" if logo_b64 else ""
 preco_atual = produto_atual["preco"]
 preco_antigo = preco_atual + (100 if preco_atual > 0 else 0)
 
-# --- 5. CSS DEFINITIVO ---
+# Dados Dinâmicos
+data_hoje, hora_agora = get_current_time()
+localizacao_usuario = get_location()
+
+# --- 6. CSS DEFINITIVO ---
 bg_visor_css = f"url('data:image/png;base64,{visor_b64}')" if visor_b64 else "#222"
 
 st.markdown(f"""
@@ -113,12 +142,21 @@ st.markdown(f"""
     [data-testid="column"] {{ display: flex; flex-direction: column; justify-content: center; }}
 
     /* LOGOS LATERAIS */
-    .side-logo-container {{ text-align: center; margin-bottom: 20px; }}
+    .side-logo-container {{ text-align: center; margin-bottom: 30px; }}
     .side-logo {{
-        max-width: 130px;
+        max-width: 140px;
         height: auto;
         filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.3));
     }}
+
+    /* WIDGETS LATERAIS (Data/Local) */
+    .widget-box {{
+        margin-top: 20px; padding: 20px;
+        border-top: 1px solid #333; border-bottom: 1px solid #333;
+        text-align: center; color: #888; font-size: 0.9rem;
+    }}
+    .widget-title {{ color: #d4af37; font-family: 'Cinzel', serif; margin-bottom: 5px; font-size: 1rem; }}
+    .widget-data {{ color: #fff; font-size: 1.1rem; letter-spacing: 1px; }}
 
     /* ESQUERDA */
     .left-panel {{ padding-right: 15px; border-right: 1px solid #333; text-align: justify; height: 100%; display: flex; flex-direction: column; justify-content: center; }}
@@ -132,31 +170,20 @@ st.markdown(f"""
         border-radius: 4px; box-shadow: 0 25px 50px rgba(0,0,0,0.9);
     }}
     
-    /* MÁSCARA */
     .visor-mask {{
-        position: absolute;
-        top: 8%; left: 18.3%; width: 63.4%; 
-        height: 66%; 
-        overflow: hidden;
-        display: flex; align-items: flex-end; justify-content: center;
+        position: absolute; top: 8%; left: 18.3%; width: 63.4%; height: 66%; 
+        overflow: hidden; display: flex; align-items: flex-end; justify-content: center;
     }}
 
     .perfume-img {{
-        /* VOLTANDO AO TAMANHO ORIGINAL */
-        height: 78%; 
-        width: auto;
-        mix-blend-mode: multiply;
-        filter: contrast(1.1) brightness(0.95);
-        transition: transform 0.5s ease;
-        margin-bottom: 4%;
+        height: 78%; width: auto;
+        mix-blend-mode: multiply; filter: contrast(1.1) brightness(0.95);
+        transition: transform 0.5s ease; margin-bottom: 4%;
         
-        /* AQUI ESTÁ A FORÇADA PARA A DIREITA */
-        margin-left: 6%; 
+        /* AJUSTE FINAL DE POSIÇÃO: Aumentei para 8.5% */
+        margin-left: 8.5%; 
     }}
-    .perfume-img:hover {{
-        transform: scale(1.75); /* Zoom 75% */
-        mix-blend-mode: normal;
-    }}
+    .perfume-img:hover {{ transform: scale(1.75); mix-blend-mode: normal; }}
 
     /* INFO E BOTOES */
     .info-container {{ text-align: center; }}
@@ -175,8 +202,7 @@ st.markdown(f"""
     .right-panel {{
         background: linear-gradient(145deg, #111, #0a0a0a); padding: 35px; 
         border-radius: 10px; text-align: center; border: 1px solid #222;
-        height: fit-content;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        height: fit-content; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }}
     .wa-btn {{
         display: block; background: linear-gradient(45deg, #25d366, #128c7e); color: white;
@@ -193,7 +219,7 @@ st.markdown(f"""
 </style>
 """, unsafe_allow_html=True)
 
-# --- 6. ESTRUTURA DO LAYOUT ---
+# --- 7. ESTRUTURA DO LAYOUT ---
 st.markdown('<div class="brand-title">AURUM SCENTS</div>', unsafe_allow_html=True)
 
 col_L, col_C, col_R = st.columns([3, 6, 3], gap="small")
@@ -202,13 +228,20 @@ col_L, col_C, col_R = st.columns([3, 6, 3], gap="small")
 with col_L:
     if logo_src:
         st.markdown(f"""<div class="side-logo-container"><img src="{logo_src}" class="side-logo"></div>""", unsafe_allow_html=True)
+    
+    # Widget de Localização
+    st.markdown(f"""
+    <div class="widget-box">
+        <div class="widget-title">SUA LOCALIZAÇÃO</div>
+        <div class="widget-data">📍 {localizacao_usuario}</div>
+    </div>
+    """, unsafe_allow_html=True)
         
     st.markdown("""
-    <div class="left-panel">
+    <div style="margin-top: 30px;">
         <h3 style="color:#d4af37; margin-bottom:20px;">A Essência do Luxo</h3>
         <p class="panel-text">Na Aurum Scents, a fragrância não é apenas um aroma, é uma assinatura invisível que define sua presença.</p>
         <p class="panel-text">Nossa curadoria busca os ingredientes mais raros do mundo para despertar os prazeres da fragrância em sua forma mais pura e sofisticada.</p>
-        <p class="panel-text" style="margin-top:15px; font-size:0.9rem; color:#888;">Cada frasco em nossa vitrine é uma promessa de distinção e elegância atemporal.</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -244,10 +277,19 @@ with col_R:
     if logo_src:
         st.markdown(f"""<div class="side-logo-container"><img src="{logo_src}" class="side-logo"></div>""", unsafe_allow_html=True)
 
+    # Widget de Data e Hora
+    st.markdown(f"""
+    <div class="widget-box">
+        <div class="widget-title">DATA E HORA</div>
+        <div class="widget-data">📅 {data_hoje} | 🕒 {hora_agora}</div>
+    </div>
+    """, unsafe_allow_html=True)
+
     msg = f"Olá Jerry! Tenho interesse no exclusivo {produto_atual['nome']}."
     link = f"https://wa.me/5531992051499?text={msg.replace(' ', '%20')}"
+    
     st.markdown(f"""
-    <div class="right-panel">
+    <div class="right-panel" style="margin-top: 30px;">
         <div style="color:#fff; margin-bottom:10px; letter-spacing:2px;">ATENDIMENTO EXCLUSIVO</div>
         <div class="contact-name" style="font-size:2rem; color:#d4af37; margin-bottom:5px;">JERRY BOMBETA</div>
         <div style="color:#888; font-size:0.9rem; font-style:italic;">Specialist Fragrance Consultant</div>
