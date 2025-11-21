@@ -40,7 +40,7 @@ CATALOGO = {
     13: {"nome": "Animale Sexy (100 ml)", "preco": 380.00, "desc": "Floral frutado gourmand bem doce, cremoso e sensual, pensado pra aquela vibe mulher poderosa / femme fatale."},
     14: {"nome": "Calvin Klein Eternity (100 ml)", "preco": 430.00, "desc": "Um aromático fougère fresco e limpo, com aquela cara clássica de “cheiro de homem elegante, arrumado e discreto."}, 
     15: {"nome": "Miss Dior (100 ml)", "preco": 1040.00, "desc": "Um perfume floral âmbar romântico, elegante e bem feminino, com aquele ar de “bouquet de flores caro” e fundo cremosinho."},
-    16: {"nome": Olympea Rabanne (100 ml)", "preco": 380.00, "desc": "Um oriental floral com baunilha salgada, bem sensual, marcante e com cara de “deusa moderna” mesmo."},
+    16: {"nome": "Olympea Rabanne (100 ml)", "preco": 380.00, "desc": "Um oriental floral com baunilha salgada, bem sensual, marcante e com cara de “deusa moderna” mesmo."},
 }
 
 # --- 4. CARREGAMENTO DE ARQUIVOS ---
