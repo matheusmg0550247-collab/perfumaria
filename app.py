@@ -36,7 +36,6 @@ def carregar_produtos_automaticamente():
     produtos_encontrados = []
     pasta_atual = os.path.dirname(os.path.abspath(__file__))
     pasta_imagens = os.path.join(pasta_atual, "imagens")
-    # Tenta achar a pasta imagens ou images
     if not os.path.exists(pasta_imagens):
         pasta_imagens = os.path.join(pasta_atual, "images")
         if not os.path.exists(pasta_imagens): return []
@@ -65,7 +64,7 @@ def get_img_as_base64(caminho):
         return base64.b64encode(data).decode('utf-8')
     except: return None
 
-# --- 4. INICIALIZAÇÃO E CARREGAMENTO DE ASSETS ---
+# --- 4. INICIALIZAÇÃO ---
 produtos = carregar_produtos_automaticamente()
 if not produtos: st.stop()
 
@@ -77,23 +76,19 @@ produto_atual = produtos[st.session_state.idx]
 img_produto_b64 = get_img_as_base64(produto_atual["arquivo"])
 
 path_base = os.path.dirname(produtos[0]["arquivo"])
-
-# Carrega Visor
 path_visor = os.path.join(path_base, "Visor.jpg")
 if not os.path.exists(path_visor): path_visor = os.path.join(path_base, "Visor.png")
 visor_b64 = get_img_as_base64(path_visor)
 
-# Carrega Logo
 path_logo = os.path.join(path_base, "Logo.jpg")
 if not os.path.exists(path_logo): path_logo = os.path.join(path_base, "Logo.png")
 logo_b64 = get_img_as_base64(path_logo)
 logo_src = f"data:image/jpeg;base64,{logo_b64}" if logo_b64 else ""
 
-
 preco_atual = produto_atual["preco"]
 preco_antigo = preco_atual + (100 if preco_atual > 0 else 0)
 
-# --- 5. CSS DEFINITIVO ---
+# --- 5. CSS DEFINITIVO (PREENCHIMENTO TOTAL) ---
 bg_visor_css = f"url('data:image/png;base64,{visor_b64}')" if visor_b64 else "#222"
 
 st.markdown(f"""
@@ -108,7 +103,7 @@ st.markdown(f"""
 
     /* HEADER */
     .brand-title {{
-        font-size: 4rem; text-align: center; margin-bottom: 50px;
+        font-size: 4rem; text-align: center; margin-bottom: 40px;
         background: linear-gradient(to right, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
         -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         text-shadow: 0 4px 10px rgba(0,0,0,0.8);
@@ -117,22 +112,22 @@ st.markdown(f"""
     /* LAYOUT */
     [data-testid="column"] {{ display: flex; flex-direction: column; justify-content: center; }}
 
-    /* ESTILO DAS LOGOS LATERAIS */
-    .side-logo-container {{ text-align: center; margin-bottom: 25px; }}
+    /* LOGOS LATERAIS */
+    .side-logo-container {{ text-align: center; margin-bottom: 20px; }}
     .side-logo {{
-        max-width: 140px;
+        max-width: 130px;
         height: auto;
-        filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.4));
+        filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.3));
     }}
 
     /* ESQUERDA */
-    .left-panel {{ padding-right: 30px; border-right: 1px solid #222; text-align: justify; height: 100%; display: flex; flex-direction: column; justify-content: center; }}
-    .panel-text {{ font-size: 1.1rem; color: #aaa; line-height: 1.8; margin-bottom: 20px; }}
+    .left-panel {{ padding-right: 15px; border-right: 1px solid #333; text-align: justify; height: 100%; display: flex; flex-direction: column; justify-content: center; }}
+    .panel-text {{ font-size: 1.1rem; color: #aaa; line-height: 1.7; margin-bottom: 20px; }}
 
     /* --- VISOR CENTRAL --- */
     .visor-wrapper {{
-        position: relative; width: 100%; max-width: 850px;
-        aspect-ratio: 16/9; margin: 0 auto 25px auto;
+        position: relative; width: 100%; max-width: 900px;
+        aspect-ratio: 16/9; margin: 0 auto 20px auto;
         background-image: {bg_visor_css}; background-size: cover; background-position: center;
         border-radius: 4px; box-shadow: 0 25px 50px rgba(0,0,0,0.9);
     }}
@@ -143,23 +138,21 @@ st.markdown(f"""
         top: 8%; left: 18.3%; width: 63.4%; 
         height: 66%; 
         overflow: hidden;
-        /* O justify-content: center AQUI garante a centralização horizontal */
         display: flex; align-items: flex-end; justify-content: center;
     }}
 
     .perfume-img {{
-        /* AJUSTE 1: Aumentei para 80% para preencher melhor o espaço */
-        height: 80%; 
+        /* AJUSTE 1: Aumentado para 92% para preencher quase toda a luz */
+        height: 92%; 
         width: auto;
         mix-blend-mode: multiply;
         filter: contrast(1.1) brightness(0.95);
         transition: transform 0.5s ease;
-        margin-bottom: 3.5%;
-        /* AJUSTE 2: Removida a margem negativa que empurrava para a esquerda */
-        margin-left: 0; 
+        /* Margem zerada para ele assentar na base */
+        margin-bottom: 0%;
     }}
     .perfume-img:hover {{
-        transform: scale(1.75); /* Zoom 75% */
+        transform: scale(1.35); /* Zoom potente */
         mix-blend-mode: normal;
     }}
 
@@ -178,7 +171,7 @@ st.markdown(f"""
 
     /* DIREITA */
     .right-panel {{
-        background: linear-gradient(145deg, #111, #0a0a0a); padding: 40px; 
+        background: linear-gradient(145deg, #111, #0a0a0a); padding: 35px; 
         border-radius: 10px; text-align: center; border: 1px solid #222;
         height: fit-content;
         box-shadow: 0 10px 30px rgba(0,0,0,0.5);
@@ -186,22 +179,23 @@ st.markdown(f"""
     .wa-btn {{
         display: block; background: linear-gradient(45deg, #25d366, #128c7e); color: white;
         padding: 15px; border-radius: 50px; text-decoration: none; font-weight: bold; font-family: sans-serif;
-        margin-top: 25px; transition: 0.3s; letter-spacing: 1px;
+        margin-top: 20px; transition: 0.3s; letter-spacing: 1px;
     }}
     .wa-btn:hover {{ transform: scale(1.05); color: white; box-shadow: 0 5px 15px rgba(37, 211, 102, 0.4); }}
 
     /* RODAPÉ */
     .final-footer {{
-        text-align: center; margin-top: 80px; padding-top: 30px;
+        text-align: center; margin-top: 60px; padding-top: 20px;
         border-top: 1px solid #222; color: #666; font-family: 'Playfair Display', serif; font-style: italic;
     }}
 </style>
 """, unsafe_allow_html=True)
 
-# --- 6. ESTRUTURA DO LAYOUT ---
+# --- 6. ESTRUTURA DO LAYOUT (AJUSTE DE GAP E PROPORÇÃO) ---
 st.markdown('<div class="brand-title">AURUM SCENTS</div>', unsafe_allow_html=True)
 
-col_L, col_C, col_R = st.columns([3, 6, 3], gap="large")
+# AJUSTE 2: GAP="SMALL" aproxima as colunas laterais do centro
+col_L, col_C, col_R = st.columns([3, 6, 3], gap="small")
 
 # ESQUERDA
 with col_L:
@@ -210,10 +204,10 @@ with col_L:
         
     st.markdown("""
     <div class="left-panel">
-        <h3 style="color:#d4af37; margin-bottom:25px;">A Essência do Luxo</h3>
+        <h3 style="color:#d4af37; margin-bottom:20px;">A Essência do Luxo</h3>
         <p class="panel-text">Na Aurum Scents, a fragrância não é apenas um aroma, é uma assinatura invisível que define sua presença.</p>
         <p class="panel-text">Nossa curadoria busca os ingredientes mais raros do mundo para despertar os prazeres da fragrância em sua forma mais pura e sofisticada.</p>
-        <p class="panel-text" style="margin-top:20px; font-size:0.9rem; color:#888;">Cada frasco em nossa vitrine é uma promessa de distinção e elegância atemporal.</p>
+        <p class="panel-text" style="margin-top:15px; font-size:0.9rem; color:#888;">Cada frasco em nossa vitrine é uma promessa de distinção e elegância atemporal.</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -234,7 +228,7 @@ with col_C:
     with c3: st.button("PRÓXIMO ❯", on_click=proximo, use_container_width=True)
 
     st.markdown(f"""
-        <div class="info-container" style="margin-top: 25px;">
+        <div class="info-container" style="margin-top: 20px;">
             <div class="prod-name">{produto_atual['nome']}</div>
             <div class="prod-desc">— {produto_atual['desc']} —</div>
             <div class="price-box">
@@ -257,7 +251,7 @@ with col_R:
         <div class="contact-name" style="font-size:2rem; color:#d4af37; margin-bottom:5px;">JERRY BOMBETA</div>
         <div style="color:#888; font-size:0.9rem; font-style:italic;">Specialist Fragrance Consultant</div>
         <a href="{link}" target="_blank" class="wa-btn">FALAR NO WHATSAPP</a>
-        <div style="margin-top:25px; color:#d4af37; font-weight:bold; letter-spacing:1px;">📞 (31) 99205-1499</div>
+        <div style="margin-top:20px; color:#d4af37; font-weight:bold; letter-spacing:1px;">📞 (31) 99205-1499</div>
     </div>
     """, unsafe_allow_html=True)
 
